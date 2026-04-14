@@ -1,0 +1,24 @@
+## .gitignore
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+.vs/
+
+# App secrets - NEVER commit these
+appsettings.Development.json
+**/appsettings.Development.json
+
+# NuGet
+packages/
+*.nupkg
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

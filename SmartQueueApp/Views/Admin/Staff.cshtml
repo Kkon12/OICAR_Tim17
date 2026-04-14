@@ -1,0 +1,123 @@
+﻿@model SmartQueueApp.Models.ViewModels.AdminStaffViewModel
+@{
+    ViewData["Title"] = "Staff Management";
+}
+
+<div class="container-fluid px-4 py-3">
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="page-title">
+                <i class="bi bi-people me-2 text-primary"></i>Staff Management
+            </h1>
+            <p class="page-subtitle">Manage Djelatnik and Admin accounts</p>
+        </div>
+        <a asp-action="CreateStaff" class="btn btn-sq-primary">
+            <i class="bi bi-person-plus me-2"></i>Add Staff
+        </a>
+    </div>
+
+    <div class="sq-card">
+        @if (Model.Users.Any())
+        {
+            <table class="sq-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in Model.Users)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-primary d-flex align-items-center
+                                                justify-content-center text-white fw-bold"
+                                         style="width:32px;height:32px;font-size:13px;flex-shrink:0">
+                                        @u.FirstName[0]
+                                    </div>
+                                    <span class="fw-semibold">
+                                        @u.FirstName @u.LastName
+                                    </span>
+                                </div>
+                            </td>
+                            <td style="color:var(--sq-muted)">@u.Email</td>
+                            <td>
+                                <span class="badge @(u.Role == "Admin" ? "bg-danger" : "bg-primary")">
+                                    @u.Role
+                                </span>
+                            </td>
+                            <td>
+                                @if (u.IsActive)
+                                {
+                                    <span class="status-active">
+                                        <i class="bi bi-circle-fill me-1"
+                                           style="font-size:0.45rem;vertical-align:middle"></i>
+                                        Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status-closed">
+                                        <i class="bi bi-circle me-1"
+                                           style="font-size:0.45rem;vertical-align:middle"></i>
+                                        Inactive
+                                    </span>
+                                }
+                            </td>
+                            <td style="color:var(--sq-muted);font-size:0.85rem">
+                                @u.CreatedAt.ToString("dd/MM/yyyy")
+                            </td>
+                            <td>
+                                @if (u.Role != "Admin")
+                                {
+                                    @if (u.IsActive)
+                                    {
+                                        <form asp-action="DeactivateStaff" method="post"
+                                              style="display:inline"
+                                              onsubmit="return confirm('Deactivate @(u.FirstName) @(u.LastName)? They will not be able to log in until reactivated.')">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@u.Id" />
+                                            <button class="btn btn-sm btn-warning">
+                                                <i class="bi bi-person-x me-1"></i>Deactivate
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="ActivateStaff" method="post"
+                                              style="display:inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@u.Id" />
+                                            <button class="btn btn-sm btn-success">
+                                                <i class="bi bi-person-check me-1"></i>Activate
+                                            </button>
+                                        </form>
+                                    }
+                                }
+                                else
+                                {
+                                    <span style="color:var(--sq-muted);font-size:0.8rem">
+                                        Protected
+                                    </span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="bi bi-people"></i>
+                <p>No staff members yet</p>
+            </div>
+        }
+    </div>
+</div>

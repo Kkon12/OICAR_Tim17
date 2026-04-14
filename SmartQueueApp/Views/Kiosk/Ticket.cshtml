@@ -1,0 +1,189 @@
+﻿@model SmartQueueApp.Models.ViewModels.TicketTakenViewModel
+@{
+    ViewData["Title"] = "Your Ticket";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="hr" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Ticket — SmartQueue</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at 50% 30%, rgba(79,142,247,0.08) 0%, transparent 60%), var(--sq-bg);
+        }
+
+        .ticket-card {
+            background: var(--sq-surface);
+            border: 1px solid var(--sq-border);
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            text-align: center;
+            max-width: 480px;
+            width: 100%;
+        }
+
+        .ticket-badge {
+            background: rgba(79,142,247,0.1);
+            border: 2px solid var(--sq-primary);
+            border-radius: 16px;
+            padding: 1.5rem 3rem;
+            display: inline-block;
+            margin: 1.5rem 0;
+        }
+
+        .ticket-number {
+            font-size: 5rem;
+            font-weight: 800;
+            color: var(--sq-primary);
+            line-height: 1;
+            letter-spacing: -2px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--sq-border);
+            font-size: 0.9rem;
+        }
+
+            .info-row:last-child {
+                border-bottom: none;
+            }
+
+        .info-label {
+            color: var(--sq-muted);
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: var(--sq-text);
+        }
+
+        /* Cooldown — button is disabled for 30 seconds after ticket is taken.
+                   Prevents accidental double-tap from taking two tickets. */
+        .btn-cooldown {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="px-3" style="width:100%">
+        @if (Model.Ticket != null)
+        {
+            var t = Model.Ticket;
+            <div class="ticket-card mx-auto">
+
+                <i class="bi bi-check-circle-fill text-success"
+                   style="font-size:2.5rem"></i>
+                <h2 class="fw-bold mt-3 mb-1">Your ticket is ready!</h2>
+                <p style="color:var(--sq-muted)">@t.QueueName</p>
+
+                <div class="ticket-badge">
+                    <div style="color:var(--sq-muted);font-size:0.75rem;
+                                text-transform:uppercase;letter-spacing:0.08em;
+                                margin-bottom:0.25rem">
+                        Ticket Number
+                    </div>
+                    <div class="ticket-number">
+                        @t.TicketNumber.ToString("D3")
+                    </div>
+                </div>
+
+                <div class="mt-3 mb-4">
+                    <div class="info-row">
+                        <span class="info-label">Position</span>
+                        <span class="info-value">#@t.Position in line</span>
+                    </div>
+                    @if (t.EstimatedWaitMinutes.HasValue)
+                    {
+                        <div class="info-row">
+                            <span class="info-label">Estimated wait</span>
+                            <span class="info-value text-warning">
+                                ~@t.EstimatedWaitMinutes minutes
+                            </span>
+                        </div>
+                    }
+                    <div class="info-row">
+                        <span class="info-label">Taken at</span>
+                        <span class="info-value">
+                            @t.CreatedAt.ToString("HH:mm")
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Status</span>
+                        <span class="info-value text-warning">Waiting</span>
+                    </div>
+                </div>
+
+                <div class="alert alert-primary py-2 mb-4" style="font-size:0.875rem">
+                    <i class="bi bi-bell me-2"></i>
+                    Please stay nearby and listen for your number to be called.
+                </div>
+
+                <a id="takeAnotherBtn"
+                   href="/kiosk"
+                   class="btn btn-sq-primary w-100 py-2 fw-semibold btn-cooldown">
+                    <i class="bi bi-arrow-left me-2"></i>
+                    <span id="btnText">Please wait <span id="countdown">30</span>s</span>
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="ticket-card mx-auto text-center">
+                <i class="bi bi-exclamation-triangle text-warning"
+                   style="font-size:3rem"></i>
+                <h3 class="mt-3">Something went wrong</h3>
+                <p style="color:var(--sq-muted)">
+                    Could not retrieve your ticket.
+                </p>
+                <a href="/kiosk" class="btn btn-sq-primary mt-2">
+                    Try Again
+                </a>
+            </div>
+        }
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+
+    @if (Model.Ticket != null)
+    {
+        <script>
+           //30 sec cooldowna za uzmi ticket , da se sprijeci "slucajni double tap"
+            // Rate limiter na APIu (cca 10 po min),odvojeno hendla
+            (function () {
+                const btn = document.getElementById('takeAnotherBtn');
+                const countdownEl = document.getElementById('countdown');
+                const btnText = document.getElementById('btnText');
+                let seconds = 30;
+
+                const timer = setInterval(function () {
+                    seconds--;
+                    countdownEl.textContent = seconds;
+
+                    if (seconds <= 0) {
+                        clearInterval(timer);
+                        btn.classList.remove('btn-cooldown');
+                        btnText.innerHTML =
+                            '<i class="bi bi-arrow-left me-2"></i>Take Another Ticket';
+                    }
+                }, 1000);
+            })();
+        </script>
+    }
+</body>
+</html>

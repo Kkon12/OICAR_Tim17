@@ -1,0 +1,64 @@
+﻿@model SmartQueueApp.Models.ViewModels.CreateQueueViewModel
+@{
+    ViewData["Title"] = "Create Queue";
+}
+
+<div class="container-fluid px-4 py-3">
+    <div class="page-header">
+        <a asp-action="Queues" style="color:var(--sq-muted);text-decoration:none;font-size:0.875rem">
+            <i class="bi bi-arrow-left me-1"></i>Back to Queues
+        </a>
+        <h1 class="page-title mt-2">
+            <i class="bi bi-plus-circle me-2 text-primary"></i>Create Queue
+        </h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="sq-card">
+                @if (Model.ErrorMessage != null)
+                {
+                    <div class="alert alert-danger mb-3">@Model.ErrorMessage</div>
+                }
+
+                <form asp-action="CreateQueue" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label">Queue Name</label>
+                        <input name="Name" value="@Model.Name"
+                               class="form-control"
+                               placeholder="e.g. Opca medicina" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="Description" class="form-control" rows="3"
+                                  placeholder="Brief description of this queue">@Model.Description</textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">
+                            Default Service Time
+                            <span style="color:var(--sq-muted)">(minutes)</span>
+                        </label>
+                        <input name="DefaultServiceMinutes"
+                               type="number" min="1" max="120"
+                               value="@Model.DefaultServiceMinutes"
+                               class="form-control" />
+                        <div class="form-text" style="color:var(--sq-muted)">
+                            Used for wait time estimates until real data is collected.
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-sq-primary">
+                            <i class="bi bi-check-lg me-2"></i>Create Queue
+                        </button>
+                        <a asp-action="Queues" class="btn btn-sq-ghost">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

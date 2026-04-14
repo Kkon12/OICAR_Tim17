@@ -1,0 +1,107 @@
+﻿@model SmartQueueApp.Models.ViewModels.AdminStatisticsViewModel
+@{
+    ViewData["Title"] = "Statistics";
+}
+
+<div class="container-fluid px-4 py-3">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="bi bi-bar-chart me-2 text-primary"></i>Statistics
+        </h1>
+        <p class="page-subtitle">Performance overview across all queues</p>
+    </div>
+
+    @if (Model.Overview != null)
+    {
+        var o = Model.Overview;
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="bi bi-ticket"></i></div>
+                    <div>
+                        <div class="stat-value">@o.TotalTicketsToday</div>
+                        <div class="stat-label">Tickets Today</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="bi bi-check-circle"></i></div>
+                    <div>
+                        <div class="stat-value">@o.TotalServedToday</div>
+                        <div class="stat-label">Served Today</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="bi bi-clock"></i></div>
+                    <div>
+                        <div class="stat-value">@o.OverallAvgWaitToday<span style="font-size:1rem">m</span></div>
+                        <div class="stat-label">Avg Wait Today</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="bi bi-skip-forward"></i></div>
+                    <div>
+                        <div class="stat-value">@o.TotalSkippedToday</div>
+                        <div class="stat-label">Skipped Today</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* Per-queue stats *@
+    @if (Model.QueueStats.Any())
+    {
+        <div class="sq-card">
+            <h6 class="fw-semibold mb-3">
+                <i class="bi bi-collection me-2 text-primary"></i>Per-Queue Breakdown
+            </h6>
+            <table class="sq-table">
+                <thead>
+                    <tr>
+                        <th>Queue</th>
+                        <th>Status</th>
+                        <th>Today</th>
+                        <th>This Week</th>
+                        <th>This Month</th>
+                        <th>Avg Wait</th>
+                        <th>Avg Service</th>
+                        <th>Skip Rate</th>
+                        <th>Counters</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.QueueStats)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@s.QueueName</td>
+                            <td>
+                                <span class="status-@s.Status.ToLower()">@s.Status</span>
+                            </td>
+                            <td>@s.TotalTicketsToday</td>
+                            <td>@s.TotalTicketsThisWeek</td>
+                            <td>@s.TotalTicketsThisMonth</td>
+                            <td>
+                                @(s.AvgWaitMinutesToday > 0 ? $"{s.AvgWaitMinutesToday} min" : "—")
+                            </td>
+                            <td>
+                                @(s.AvgServiceMinutesToday > 0 ? $"{s.AvgServiceMinutesToday} min" : "—")
+                            </td>
+                            <td>
+                                <span class="@(s.SkipRateToday > 20 ? "text-danger fw-semibold" : "")">
+                                    @s.SkipRateToday%
+                                </span>
+                            </td>
+                            <td>@s.OpenCounters/@s.TotalCounters</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

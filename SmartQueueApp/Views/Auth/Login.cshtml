@@ -1,0 +1,141 @@
+﻿@model SmartQueueApp.Models.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = null; // No navbar on login page
+}
+<!DOCTYPE html>
+<html lang="hr" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login — SmartQueue</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <style>
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at 60% 20%, rgba(79,142,247,0.08) 0%, transparent 60%), var(--sq-bg);
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 420px;
+            padding: 0 1rem;
+        }
+
+        .login-card {
+            background: var(--sq-surface);
+            border: 1px solid var(--sq-border);
+            border-radius: 16px;
+            padding: 2.5rem;
+        }
+
+        .login-logo {
+            width: 48px;
+            height: 48px;
+            background: var(--sq-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin: 0 auto 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-box">
+            <div class="login-card">
+
+                @* Logo *@
+                <div class="text-center mb-4">
+                    <div class="login-logo">
+                        <i class="bi bi-collection"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1" style="color: var(--sq-text)">SmartQueue</h4>
+                    <p style="color: var(--sq-muted); font-size: 0.875rem">
+                        Sign in to your account
+                    </p>
+                </div>
+
+                @* Error message *@
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-3">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span>@Model.ErrorMessage</span>
+                    </div>
+                }
+
+                @* Form *@
+                <form asp-action="Login" asp-controller="Auth" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ReturnUrl" />
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text"
+                                  style="background: var(--sq-surface);
+                                     border: 1px solid var(--sq-border);
+                                     color: var(--sq-muted);">
+                                <i class="bi bi-envelope"></i>
+                            </span>
+                            <input asp-for="Email"
+                                   class="form-control"
+                                   placeholder="you@smartqueue.com"
+                                   autocomplete="email" />
+                        </div>
+                        <span asp-validation-for="Email"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"
+                                  style="background: var(--sq-surface);
+                                     border: 1px solid var(--sq-border);
+                                     color: var(--sq-muted);">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input asp-for="Password"
+                                   class="form-control"
+                                   type="password"
+                                   placeholder="••••••••"
+                                   autocomplete="current-password" />
+                        </div>
+                        <span asp-validation-for="Password"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary w-100 py-2 fw-semibold">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                    </button>
+                </form>
+
+            </div>
+
+            @* Footer *@
+            <p class="text-center mt-3"
+               style="color: var(--sq-muted); font-size: 0.8rem">
+                SmartQueue &copy; 2026 — Digital Queue Management
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+    @* Replace with this: *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+</body>
+</html>

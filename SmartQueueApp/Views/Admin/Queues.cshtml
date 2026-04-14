@@ -1,0 +1,122 @@
+﻿@model SmartQueueApp.Models.ViewModels.AdminQueuesViewModel
+@{
+    ViewData["Title"] = "Queues";
+}
+
+<div class="container-fluid px-4 py-3">
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="page-title">
+                <i class="bi bi-collection me-2 text-primary"></i>Queue Management
+            </h1>
+            <p class="page-subtitle">Create and manage queues</p>
+        </div>
+        <a asp-action="CreateQueue" class="btn btn-sq-primary">
+            <i class="bi bi-plus-lg me-2"></i>New Queue
+        </a>
+    </div>
+
+    @if (Model.ErrorMessage != null)
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    @if (Model.Queues.Any())
+    {
+        <div class="sq-card">
+            <table class="sq-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Waiting</th>
+                        <th>Open Counters</th>
+                        <th>Default Service</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var q in Model.Queues)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@q.Name</td>
+                            <td>
+                                <span class="status-@q.Status.ToLower()">
+                                    <i class="bi bi-circle-fill me-1"
+                                       style="font-size:0.45rem;vertical-align:middle"></i>
+                                    @q.Status
+                                </span>
+                            </td>
+                            <td>@q.TotalWaiting</td>
+                            <td>@q.OpenCounters</td>
+                            <td>@q.DefaultServiceMinutes min</td>
+                            <td style="color:var(--sq-muted);font-size:0.85rem">
+                                @q.CreatedAt.ToString("dd/MM/yyyy")
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <a asp-action="QueueDetail"
+                                       asp-route-id="@q.Id"
+                                       class="btn btn-sm btn-sq-ghost">
+                                        <i class="bi bi-eye me-1"></i>Detail
+                                    </a>
+
+                                    @* Status toggle *@
+                                    @if (q.Status == "Active")
+                                    {
+                                        <form asp-action="UpdateQueueStatus" method="post"
+                                              style="display:inline"
+                                              onsubmit="return confirm('Pause \'@q.Name\'? Customers will not be able to take new tickets until it is reactivated.')">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@q.Id" />
+                                            <input type="hidden" name="status" value="Paused" />
+                                            <button class="btn btn-sm btn-warning">
+                                                <i class="bi bi-pause me-1"></i>Pause
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (q.Status == "Paused")
+                                    {
+                                        <form asp-action="UpdateQueueStatus" method="post"
+                                              style="display:inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@q.Id" />
+                                            <input type="hidden" name="status" value="Active" />
+                                            <button class="btn btn-sm btn-success">
+                                                <i class="bi bi-play me-1"></i>Activate
+                                            </button>
+                                        </form>
+                                    }
+
+                                    @* Delete *@
+                                    <form asp-action="DeleteQueue" method="post"
+                                          style="display:inline"
+                                          onsubmit="return confirm('Delete \'@q.Name\'? This cannot be undone. @(q.TotalWaiting > 0 ? q.TotalWaiting + " customer(s) are currently waiting." : "There are no customers waiting.")')">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@q.Id" />
+                                        <button class="btn btn-sm btn-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="sq-card">
+            <div class="empty-state">
+                <i class="bi bi-collection"></i>
+                <p>No queues yet</p>
+                <a asp-action="CreateQueue" class="btn btn-sq-primary">
+                    Create your first queue
+                </a>
+            </div>
+        </div>
+    }
+</div>

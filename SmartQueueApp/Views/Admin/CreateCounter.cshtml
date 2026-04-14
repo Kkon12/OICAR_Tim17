@@ -1,0 +1,64 @@
+﻿@model SmartQueueApp.Models.ViewModels.CreateCounterViewModel
+@{
+    ViewData["Title"] = "Add Counter";
+}
+
+<div class="container-fluid px-4 py-3">
+    <div class="page-header">
+        <a asp-action="QueueDetail" asp-route-id="@Model.QueueId"
+           style="color:var(--sq-muted);text-decoration:none;font-size:0.875rem">
+            <i class="bi bi-arrow-left me-1"></i>Back to Queue
+        </a>
+        <h1 class="page-title mt-2">
+            <i class="bi bi-plus-circle me-2 text-primary"></i>Add Counter
+        </h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-5">
+            <div class="sq-card">
+                @if (Model.ErrorMessage != null)
+                {
+                    <div class="alert alert-danger mb-3">@Model.ErrorMessage</div>
+                }
+
+                <form asp-action="CreateCounter" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="QueueId" value="@Model.QueueId" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Counter Name</label>
+                        <input name="Name" value="@Model.Name"
+                               class="form-control"
+                               placeholder="e.g. Salter 1" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">
+                            Assign Djelatnik
+                            <span style="color:var(--sq-muted)">(optional)</span>
+                        </label>
+                        <select name="AssignedUserId" class="form-select">
+                            <option value="">— Unassigned —</option>
+                            @foreach (var s in Model.AvailableStaff)
+                            {
+                                <option value="@s.Id">
+                                    @s.FirstName @s.LastName (@s.Email)
+                                </option>
+                            }
+                        </select>
+                    </div> 
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-sq-primary">
+                            <i class="bi bi-check-lg me-2"></i>Create Counter
+                        </button>
+                        <a asp-action="QueueDetail"
+                           asp-route-id="@Model.QueueId"
+                           class="btn btn-sq-ghost">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

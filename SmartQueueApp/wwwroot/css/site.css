@@ -1,0 +1,313 @@
+﻿/* ── Base ──────────────────────────────────────────────────────────────────── */
+:root {
+    --sq-bg: #0f1117;
+    --sq-surface: #1a1d27;
+    --sq-border: #2a2d3a;
+    --sq-primary: #4f8ef7;
+    --sq-success: #3ecf8e;
+    --sq-warning: #f5a623;
+    --sq-danger: #e74c3c;
+    --sq-text: #e2e8f0;
+    --sq-muted: #8892a4;
+}
+
+body {
+    background-color: var(--sq-bg);
+    color: var(--sq-text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+}
+
+/* ── Cards ─────────────────────────────────────────────────────────────────── */
+.sq-card {
+    background: var(--sq-surface);
+    border: 1px solid var(--sq-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.sq-card-hover {
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+    .sq-card-hover:hover {
+        border-color: var(--sq-primary);
+        transform: translateY(-2px);
+    }
+
+/* ── Stat Cards ────────────────────────────────────────────────────────────── */
+.stat-card {
+    background: var(--sq-surface);
+    border: 1px solid var(--sq-border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+    .stat-icon.blue {
+        background: rgba(79,142,247,0.15);
+        color: var(--sq-primary);
+    }
+
+    .stat-icon.green {
+        background: rgba(62,207,142,0.15);
+        color: var(--sq-success);
+    }
+
+    .stat-icon.orange {
+        background: rgba(245,166,35,0.15);
+        color: var(--sq-warning);
+    }
+
+    .stat-icon.red {
+        background: rgba(231,76,60,0.15);
+        color: var(--sq-danger);
+    }
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--sq-text);
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--sq-muted);
+    margin-top: 2px;
+}
+
+/* ── Ticket Number Display ─────────────────────────────────────────────────── */
+.ticket-number {
+    font-size: 5rem;
+    font-weight: 800;
+    color: var(--sq-primary);
+    line-height: 1;
+    letter-spacing: -2px;
+}
+
+.ticket-badge {
+    background: rgba(79,142,247,0.1);
+    border: 2px solid var(--sq-primary);
+    border-radius: 16px;
+    padding: 2rem 3rem;
+    text-align: center;
+    display: inline-block;
+}
+
+/* ── Queue Status Badges ───────────────────────────────────────────────────── */
+.status-active {
+    color: var(--sq-success);
+}
+
+.status-paused {
+    color: var(--sq-warning);
+}
+
+.status-closed {
+    color: var(--sq-muted);
+}
+
+.status-waiting {
+    color: var(--sq-warning);
+}
+
+.status-called {
+    color: var(--sq-primary);
+}
+
+.status-done {
+    color: var(--sq-success);
+}
+
+.status-skipped {
+    color: var(--sq-danger);
+}
+
+/* ── Tables ────────────────────────────────────────────────────────────────── */
+.sq-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+    .sq-table th {
+        background: var(--sq-border);
+        color: var(--sq-muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--sq-border);
+    }
+
+    .sq-table td {
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid var(--sq-border);
+        vertical-align: middle;
+        color: var(--sq-text);
+    }
+
+    .sq-table tbody tr:hover td {
+        background: rgba(79,142,247,0.04);
+    }
+
+    .sq-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+/* ── Buttons ───────────────────────────────────────────────────────────────── */
+.btn-sq-primary {
+    background: var(--sq-primary);
+    border: none;
+    color: white;
+    border-radius: 8px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    transition: opacity 0.15s;
+}
+
+    .btn-sq-primary:hover {
+        opacity: 0.85;
+        color: white;
+    }
+
+.btn-sq-ghost {
+    background: transparent;
+    border: 1px solid var(--sq-border);
+    color: var(--sq-muted);
+    border-radius: 8px;
+    padding: 0.5rem 1.25rem;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+    .btn-sq-ghost:hover {
+        border-color: var(--sq-primary);
+        color: var(--sq-primary);
+    }
+
+/* ── Forms ─────────────────────────────────────────────────────────────────── */
+.form-control, .form-select {
+    background: var(--sq-surface) !important;
+    border: 1px solid var(--sq-border) !important;
+    color: var(--sq-text) !important;
+    border-radius: 8px;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--sq-primary) !important;
+        box-shadow: 0 0 0 3px rgba(79,142,247,0.15) !important;
+    }
+
+.form-label {
+    color: var(--sq-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+}
+
+/* ── Page Header ───────────────────────────────────────────────────────────── */
+.page-header {
+    padding: 1.5rem 0 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--sq-border);
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--sq-text);
+    margin: 0;
+}
+
+.page-subtitle {
+    color: var(--sq-muted);
+    font-size: 0.875rem;
+    margin: 0.25rem 0 0;
+}
+
+/* ── Navbar ────────────────────────────────────────────────────────────────── */
+.navbar {
+    background: rgba(26,29,39,0.95) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--sq-border) !important;
+}
+
+.nav-link {
+    color: var(--sq-muted) !important;
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem !important;
+    transition: color 0.15s, background 0.15s;
+}
+
+    .nav-link:hover, .nav-link.active {
+        color: var(--sq-text) !important;
+        background: rgba(79,142,247,0.1);
+    }
+
+/* ── Counter Display (Djelatnik) ───────────────────────────────────────────── */
+.counter-display {
+    background: var(--sq-surface);
+    border: 2px solid var(--sq-border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+}
+
+    .counter-display.open {
+        border-color: var(--sq-success);
+    }
+
+.serving-number {
+    font-size: 4rem;
+    font-weight: 800;
+    color: var(--sq-success);
+    line-height: 1;
+}
+
+/* ── Alerts / Empty States ─────────────────────────────────────────────────── */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--sq-muted);
+}
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+        opacity: 0.4;
+    }
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--sq-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--sq-border);
+    border-radius: 3px;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--sq-muted);
+    }

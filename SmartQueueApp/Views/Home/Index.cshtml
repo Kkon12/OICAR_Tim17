@@ -1,0 +1,53 @@
+﻿@{
+    ViewData["Title"] = "SmartQueue";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="hr" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SmartQueue</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <style>
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            background: radial-gradient(ellipse at 60% 20%, rgba(79,142,247,0.08) 0%, transparent 60%), var(--sq-bg);
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="container text-center" style="max-width:600px">
+            <div class="mb-4" style="font-size:3.5rem;color:var(--sq-primary)">
+                <i class="bi bi-collection"></i>
+            </div>
+            <h1 class="fw-bold mb-3" style="font-size:2.5rem">SmartQueue</h1>
+            <p style="color:var(--sq-muted);font-size:1.1rem;margin-bottom:2.5rem">
+                Digital queue management with intelligent wait time estimation.
+            </p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="/auth/login" class="btn btn-primary btn-lg px-4">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Staff Login
+                </a>
+                <a href="/kiosk" class="btn btn-outline-secondary btn-lg px-4">
+                    <i class="bi bi-ticket me-2"></i>Take a Ticket
+                </a>
+            </div>
+            <div class="mt-5 d-flex justify-content-center gap-4 flex-wrap"
+                 style="color:var(--sq-muted);font-size:0.875rem">
+                <span><i class="bi bi-clock me-1"></i>Real-time estimates</span>
+                <span><i class="bi bi-broadcast me-1"></i>Live updates</span>
+                <span><i class="bi bi-shield-check me-1"></i>Secure</span>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
