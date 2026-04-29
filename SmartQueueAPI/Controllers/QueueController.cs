@@ -23,8 +23,8 @@ namespace SmartQueueAPI.Controllers
             _estimationService = estimationService;
         }
 
-        // ── GET /api/queue ────────────────────────────────────────────────────
-        // Public — list all active queues
+        // ── GET /api/queue 
+        
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -49,8 +49,8 @@ namespace SmartQueueAPI.Controllers
             return Ok(response);
         }
 
-        // ── GET /api/queue/{id} ───────────────────────────────────────────────
-        // Public — get single queue details
+        // ── GET /api/queue/{id} 
+        
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -76,8 +76,8 @@ namespace SmartQueueAPI.Controllers
             });
         }
 
-        // ── GET /api/queue/{id}/estimate ──────────────────────────────────────
-        // Public — get full live queue status with estimates
+        // ── GET /api/queue/{id}/estimate 
+        
         [HttpGet("{id}/estimate")]
         public async Task<IActionResult> GetEstimate(int id)
         {
@@ -89,8 +89,8 @@ namespace SmartQueueAPI.Controllers
             return Ok(status);
         }
 
-        // ── POST /api/queue ───────────────────────────────────────────────────
-        // Admin only — create new queue
+        // ── POST /api/queue 
+        
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] CreateQueueDto dto)
@@ -121,7 +121,7 @@ namespace SmartQueueAPI.Controllers
         }
 
         // ── PUT /api/queue/{id} ───────────────────────────────────────────────
-        // Admin only — update queue details
+    
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateQueueDto dto)
@@ -139,7 +139,7 @@ namespace SmartQueueAPI.Controllers
         }
 
         // ── PATCH /api/queue/{id}/status ──────────────────────────────────────
-        // Admin only — change queue status
+        
         [HttpPatch("{id}/status")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] string status)
@@ -158,7 +158,7 @@ namespace SmartQueueAPI.Controllers
         }
 
         // ── DELETE /api/queue/{id} ────────────────────────────────────────────
-        // Admin only — delete queue
+        
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)

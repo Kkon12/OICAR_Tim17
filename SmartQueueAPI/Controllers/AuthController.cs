@@ -35,8 +35,8 @@ namespace SmartQueueAPI.Controllers
             _context = context;
         }
 
-        // ── POST /api/auth/register ──────────────────────────────────────────
-        // Public — creates Korisnik account
+        // ── POST /api/auth/register **
+        // Public
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
@@ -61,8 +61,8 @@ namespace SmartQueueAPI.Controllers
             return Ok(new { message = "Registration successful." });
         }
 
-        // ── POST /api/auth/register-staff ────────────────────────────────────
-        // Admin only — creates Djelatnik or Admin account
+        // ── POST /api/auth/register-staff 
+       
         [HttpPost("register-staff")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RegisterStaff([FromBody] RegisterStaffDto dto)
@@ -92,7 +92,7 @@ namespace SmartQueueAPI.Controllers
             return Ok(new { message = $"{dto.Role} account created successfully." });
         }
 
-        // ── POST /api/auth/login ─────────────────────────────────────────────
+        // ── POST /api/auth/login 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
@@ -117,7 +117,7 @@ namespace SmartQueueAPI.Controllers
             });
         }
 
-        // ── POST /api/auth/refresh-token ─────────────────────────────────────
+        // ── POST /api/auth/refresh-token 
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto dto)
         {
@@ -158,7 +158,7 @@ namespace SmartQueueAPI.Controllers
             });
         }
 
-        // ── POST /api/auth/logout ────────────────────────────────────────────
+        // ── POST /api/auth/logout 
         [HttpPost("logout")]
         [Authorize]
         public async Task<IActionResult> Logout([FromBody] string refreshToken)
@@ -177,8 +177,8 @@ namespace SmartQueueAPI.Controllers
             return Ok(new { message = "Logged out successfully." });
         }
 
-        // ── GET /api/auth/me ──────────────────────────────────────────────────────
-        // Any authenticated user — returns their own profile
+        
+        
         [HttpGet("me")]
         [Authorize]
         public async Task<IActionResult> Me()
@@ -204,8 +204,8 @@ namespace SmartQueueAPI.Controllers
             });
         }
 
-        // ── GET /api/auth/users ───────────────────────────────────────────────────
-        // Admin only — list all users with their roles
+        // ── GET /api/auth/users 
+        
         [HttpGet("users")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllUsers()
@@ -232,8 +232,8 @@ namespace SmartQueueAPI.Controllers
             return Ok(result);
         }
 
-        // ── PATCH /api/auth/users/{id}/deactivate ─────────────────────────────────
-        // Admin only — deactivate a user account (soft delete)
+        // ── PATCH /api/auth/users/{id}/deactivate 
+        // Soft delete -> samo admin
         [HttpPatch("users/{id}/deactivate")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeactivateUser(string id)
@@ -247,7 +247,7 @@ namespace SmartQueueAPI.Controllers
             if (user.Id == requestingUserId)
                 return BadRequest(new { message = "Cannot deactivate your own account." });
 
-            // LockoutEnd far in future = effectively deactivated
+            // LockoutEnd far in future = efektivno su deaktivirani
             user.LockoutEnabled = true;
             user.LockoutEnd = DateTimeOffset.UtcNow.AddYears(100);
             await _userManager.UpdateAsync(user);
@@ -255,8 +255,8 @@ namespace SmartQueueAPI.Controllers
             return Ok(new { message = $"User {user.Email} has been deactivated." });
         }
 
-        // ── PATCH /api/auth/users/{id}/activate ──────────────────────────────────
-        // Admin only — reactivate a previously deactivated user
+        // ── PATCH /api/auth/users/{id}/activate 
+        // Reaktivacija
         [HttpPatch("users/{id}/activate")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ActivateUser(string id)
@@ -272,7 +272,7 @@ namespace SmartQueueAPI.Controllers
             return Ok(new { message = $"User {user.Email} has been activated." });
         }
 
-        // ── PRIVATE HELPERS ──────────────────────────────────────────────────
+        // ──  HELPERSi
         private (string Token, DateTime ExpiresAt) GenerateJwtToken(
             ApplicationUser user, string role)
         {

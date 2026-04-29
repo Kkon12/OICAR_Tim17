@@ -61,7 +61,7 @@ namespace SmartQueueAPI.Helpers
 
 
 /*Why two converters: One handles DateTime, 
- * the other handles DateTime? (nullable) — both are common in your models (e.g. CalledAt?, CompletedAt?).
+ * the other handles DateTime? (nullable) , both are common in  models (e.g. CalledAt?, CompletedAt?).
 Why UTC internally: Croatia is UTC+1 (winter) and UTC+2 (summer/DST). 
 Storing UTC means the DB is always correct regardless of daylight saving time changes.
 We only convert at the display layer.*/

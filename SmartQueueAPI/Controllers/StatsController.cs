@@ -19,8 +19,8 @@ namespace SmartQueueAPI.Controllers
             _context = context;
         }
 
-        // ── GET /api/stats/overview ───────────────────────────────────────────
-        // Admin/Djelatnik — full system overview for dashboard
+        // ── GET /api/stats/overview 
+        
         [HttpGet("overview")]
         public async Task<IActionResult> GetOverview()
         {
@@ -85,8 +85,8 @@ namespace SmartQueueAPI.Controllers
             });
         }
 
-        // ── GET /api/stats/queue/{id} ─────────────────────────────────────────
-        // Admin/Djelatnik — detailed stats for a single queue
+        // ── GET /api/stats/queue/{id} 
+        
         [HttpGet("queue/{id}")]
         public async Task<IActionResult> GetQueueStats(int id)
         {
@@ -105,8 +105,8 @@ namespace SmartQueueAPI.Controllers
             return Ok(BuildQueueSummary(queue, today, tomorrow));
         }
 
-        // ── GET /api/stats/queue/{id}/peakhours ───────────────────────────────
-        // Admin — peak hour and day analysis for a queue
+        // ── GET /api/stats/queue/{id}/peakhours 
+        
         [HttpGet("queue/{id}/peakhours")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPeakHours(int id)
@@ -117,14 +117,14 @@ namespace SmartQueueAPI.Controllers
             if (queue == null)
                 return NotFound(new { message = $"Queue {id} not found." });
 
-            // Get all completed tickets for this queue
+       
             var tickets = await _context.Tickets
                 .Where(t => t.QueueId == id
                          && t.Status == TicketStatus.Done
                          && t.ActualWaitMinutes.HasValue)
                 .ToListAsync();
 
-            // ── By hour of day ────────────────────────────────────────────────
+     
             var byHour = tickets
                 .GroupBy(t => t.CreatedAt.Hour)
                 .Select(g => new PeakHourDto
@@ -138,7 +138,7 @@ namespace SmartQueueAPI.Controllers
                 .OrderBy(h => h.HourOfDay)
                 .ToList();
 
-            // ── By day of week ────────────────────────────────────────────────
+         
             var dayNames = new[]
             {
                 "Sunday","Monday","Tuesday","Wednesday",
@@ -170,7 +170,7 @@ namespace SmartQueueAPI.Controllers
         }
 
         // ── GET /api/stats/queue/{id}/counters ────────────────────────────────
-        // Admin — counter performance breakdown for a queue
+       
         [HttpGet("queue/{id}/counters")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetCounterStats(int id)
@@ -218,7 +218,7 @@ namespace SmartQueueAPI.Controllers
         }
 
         // ── GET /api/stats/queue/{id}/trend ───────────────────────────────────
-        // Admin — daily ticket count trend for last 30 days
+       
         [HttpGet("queue/{id}/trend")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetTrend(int id, [FromQuery] int days = 30)
@@ -256,7 +256,7 @@ namespace SmartQueueAPI.Controllers
             });
         }
 
-        // ── PRIVATE HELPER ────────────────────────────────────────────────────
+        // ── PRIVATE HELPER 
         private static QueueSummaryStatsDto BuildQueueSummary(
             Queue queue, DateTime today, DateTime tomorrow)
         {

@@ -19,8 +19,8 @@ namespace SmartQueueAPI.Controllers
             _context = context;
         }
 
-        // ── GET /api/counter/queue/{queueId} ──────────────────────────────────
-        // Public — list all counters for a queue
+        // ── GET /api/counter/queue/{queueId} 
+        
         [HttpGet("queue/{queueId}")]
         public async Task<IActionResult> GetByQueue(int queueId)
         {
@@ -52,12 +52,8 @@ namespace SmartQueueAPI.Controllers
             return Ok(response);
         }
 
-        // ── GET /api/counter/mine ─────────────────────────────────────────────
-        // Djelatnik/Admin — returns the single counter assigned to the currently
-        // authenticated user. Single DB query — replaces the N+1 loop that
-        // previously called GetQueuesAsync() + GetCountersAsync() for every queue.
-        // Returns 404 when no counter is assigned — MVC maps this to the
-        // "No counter assigned" state, which is a valid and expected condition.
+        // ── GET /api/counter/mine 
+
         [HttpGet("mine")]
         [Authorize(Roles = "Admin,Djelatnik")]
         public async Task<IActionResult> GetMine()
@@ -95,8 +91,8 @@ namespace SmartQueueAPI.Controllers
             });
         }
 
-        // ── GET /api/counter/{id} ─────────────────────────────────────────────
-        // Public — get single counter details
+        // ── GET /api/counter/{id} 
+   
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -128,8 +124,8 @@ namespace SmartQueueAPI.Controllers
             });
         }
 
-        // ── POST /api/counter ─────────────────────────────────────────────────
-        // Admin only — create new counter for a queue
+        // ── POST /api/counter 
+
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] CreateCounterDto dto)
@@ -164,7 +160,7 @@ namespace SmartQueueAPI.Controllers
         }
 
         // ── PUT /api/counter/{id} ─────────────────────────────────────────────
-        // Admin only — update counter name or assigned user
+       
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateCounterDto dto)
@@ -184,7 +180,7 @@ namespace SmartQueueAPI.Controllers
         }
 
         // ── PATCH /api/counter/{id}/open ──────────────────────────────────────
-        // Djelatnik/Admin — open counter (start of shift)
+     
         [HttpPatch("{id}/open")]
         [Authorize(Roles = "Admin,Djelatnik")]
         public async Task<IActionResult> OpenCounter(int id)
@@ -203,7 +199,7 @@ namespace SmartQueueAPI.Controllers
         }
 
         // ── PATCH /api/counter/{id}/close ─────────────────────────────────────
-        // Djelatnik/Admin — close counter (end of shift)
+      
         [HttpPatch("{id}/close")]
         [Authorize(Roles = "Admin,Djelatnik")]
         public async Task<IActionResult> CloseCounter(int id)
@@ -228,7 +224,7 @@ namespace SmartQueueAPI.Controllers
         }
 
         // ── PATCH /api/counter/{id}/assign ────────────────────────────────────
-        // Admin only — assign a Djelatnik to a counter
+      
         [HttpPatch("{id}/assign")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AssignUser(int id, [FromBody] AssignUserDto dto)
@@ -248,7 +244,7 @@ namespace SmartQueueAPI.Controllers
         }
 
         // ── DELETE /api/counter/{id} ──────────────────────────────────────────
-        // Admin only — delete a counter
+    
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)

@@ -18,7 +18,7 @@ namespace SmartQueueAPI
             RoleManager<IdentityRole> roleManager,
             AppDbContext context)
         {
-            // ── Seed Roles ────────────────────────────────────────────────────
+            // ── Seed Ulogee
             string[] roles = { "Admin", "Djelatnik", "Korisnik" };
             foreach (var role in roles)
             {
@@ -26,7 +26,7 @@ namespace SmartQueueAPI
                     await roleManager.CreateAsync(new IdentityRole(role));
             }
 
-            // ── Seed Admin User ───────────────────────────────────────────────
+            // ── Seed Admin User
             var adminEmail = "admin@smartqueue.com";
             if (await userManager.FindByEmailAsync(adminEmail) == null)
             {
@@ -43,7 +43,7 @@ namespace SmartQueueAPI
                     await userManager.AddToRoleAsync(admin, "Admin");
             }
 
-            // ── Seed Djelatnik Users ──────────────────────────────────────────
+            // ── Seed Djelatnik Users 
             var djelatnici = new[]
             {
                 new { First = "Ivan",  Last = "Horvat", Email = "ivan@smartqueue.com" },
@@ -69,7 +69,7 @@ namespace SmartQueueAPI
                 }
             }
 
-            // ── Seed Queues ───────────────────────────────────────────────────
+            // ── Seed Queues
             if (!await context.Queues.AnyAsync())
             {
                 var queues = new List<Queue>
@@ -111,7 +111,7 @@ namespace SmartQueueAPI
                 context.Queues.AddRange(queues);
                 await context.SaveChangesAsync();
 
-                // ── Seed Counters ─────────────────────────────────────────────
+                // ── Seed Counters
                 var opca = await context.Queues
                     .FirstAsync(q => q.Name == "Opća medicina");
                 var blagajna = await context.Queues

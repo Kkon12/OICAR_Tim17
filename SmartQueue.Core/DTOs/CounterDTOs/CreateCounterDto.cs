@@ -12,7 +12,7 @@ namespace SmartQueue.Core.DTOs.CounterDTOs
         [Range(1, int.MaxValue, ErrorMessage = "A valid QueueId is required.")]
         public int QueueId { get; set; }
 
-        // Optional — counter can be created without an assigned Djelatnik
+        // Salter moze bit stvoren bezh da ima dodjeljenog djelatnika
         public string? AssignedUserId { get; set; }
     }
 }

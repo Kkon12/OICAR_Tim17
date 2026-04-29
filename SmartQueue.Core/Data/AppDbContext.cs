@@ -18,7 +18,7 @@ namespace SmartQueue.Core.Data
         {
             base.OnModelCreating(builder);
 
-            // ── Queue ─────────────────────────────────────────────────────────
+            // ── Queue -Red
             builder.Entity<Queue>(entity =>
             {
                 entity.HasKey(q => q.Id);
@@ -27,7 +27,7 @@ namespace SmartQueue.Core.Data
                 entity.Property(q => q.Status).HasConversion<string>();
             });
 
-            // ── Ticket ────────────────────────────────────────────────────────
+            // ── ticket - Listic
             builder.Entity<Ticket>(entity =>
             {
                 entity.HasKey(t => t.Id);
@@ -49,7 +49,7 @@ namespace SmartQueue.Core.Data
                       .OnDelete(DeleteBehavior.SetNull);
             });
 
-            // ── Counter ───────────────────────────────────────────────────────
+            // ── counter salter
             builder.Entity<Counter>(entity =>
             {
                 entity.HasKey(c => c.Id);
@@ -67,7 +67,7 @@ namespace SmartQueue.Core.Data
                       .OnDelete(DeleteBehavior.SetNull);
             });
 
-            // ── RefreshToken ──────────────────────────────────────────────────
+            // ── RefreshToken
             builder.Entity<RefreshToken>(entity =>
             {
                 entity.HasKey(r => r.Id);
@@ -77,7 +77,7 @@ namespace SmartQueue.Core.Data
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // ── QueueStatSnapshot ─────────────────────────────────────────────
+            // ── QueueStatSnapshot 
             builder.Entity<QueueStatSnapshot>(entity =>
             {
                 entity.HasKey(s => s.Id);

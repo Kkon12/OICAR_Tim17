@@ -12,26 +12,26 @@ namespace SmartQueueAPI.Hubs
             _estimationService = estimationService;
         }
 
-        // ── Client joins a queue group ────────────────────────────────────────
-        // Called when customer opens the queue screen on mobile/kiosk
+        // ── Client se pridruzi redu 
+        //Poziva se kad customer otvara na s
         public async Task JoinQueueGroup(int queueId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, $"queue-{queueId}");
 
-            // Send current queue status immediately on join
+            // salje trenutni status
             var status = await _estimationService.GetQueueStatusAsync(queueId);
             await Clients.Caller.SendAsync("QueueStatusUpdated", status);
         }
 
-        // ── Client leaves a queue group ───────────────────────────────────────
-        // Called when customer closes the screen or is served
+        // ── Client leaves a queue group 
+        // Poziva se kad je kastomer posluzen ili izlazi iz reda
         public async Task LeaveQueueGroup(int queueId)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"queue-{queueId}");
         }
 
-        // ── Notify all clients in a queue group ───────────────────────────────
-        // Called internally from TicketController when ticket status changes
+        // ── obavijesti sve klijente u redu
+        // poziva se iz ticket kontrolera
         public static async Task NotifyQueueUpdated(
             IHubContext<QueueHub> hubContext,
             IEstimationService estimationService,

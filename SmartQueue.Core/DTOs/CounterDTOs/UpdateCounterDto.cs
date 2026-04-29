@@ -9,7 +9,7 @@ namespace SmartQueue.Core.DTOs.CounterDTOs
             ErrorMessage = "Counter name must be between 2 and 100 characters.")]
         public string Name { get; set; } = string.Empty;
 
-        // Optional — can unassign by passing null
+        // Proslijedi null za odjavu/unassign
         public string? AssignedUserId { get; set; }
     }
 }

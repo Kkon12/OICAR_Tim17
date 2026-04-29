@@ -34,9 +34,9 @@ namespace SmartQueueAPI.Controllers
          * Hub methods — IHubContext is the correct way for server-side code to push messages to connected clients.*/
 
         // ── POST /api/ticket/take ─────────────────────────────────────────────
-        // Public — anonymous kiosk or registered user takes a ticket.
-        // [EnableRateLimiting] activates the "kiosk" sliding window policy defined
-        // in Program.cs — max 10 tickets per minute per IP. Returns 429 if exceeded.
+        // Public — anonimni ili registrirani user uzima ticket
+        // [EnableRateLimiting] aktivira sliding window policy iz program.csa
+        // odnosno ,pravilo je-> max 10 tickets per minute per IP. Returns 429 if exceeded.
         // ModelState check activates [Range] validation on TakeTicketDto.QueueId.
         [HttpPost("take")]
         [EnableRateLimiting("kiosk")]
@@ -45,7 +45,7 @@ namespace SmartQueueAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Check queue exists and is active
+            // Provjera: jel queue postoji i jeli aktivan
             var queue = await _context.Queues
                 .FirstOrDefaultAsync(q => q.Id == dto.QueueId);
 
@@ -55,19 +55,19 @@ namespace SmartQueueAPI.Controllers
             if (queue.Status != QueueStatus.Active)
                 return BadRequest(new { message = $"Queue is {queue.Status}. Cannot take ticket." });
 
-            // Calculate position — how many waiting tickets ahead
+            // Izracun pozicije u redu/queue — Koliko ticketa ceka ispred
             var position = await _context.Tickets
                 .CountAsync(t => t.QueueId == dto.QueueId
                               && t.Status == TicketStatus.Waiting) + 1;
 
-            // Generate next ticket number for this queue
-            // Each queue has its own ticket number sequence — Opća medicina has 001, 002...
-            // and Blagajna independently has 001, 002... They don't share a global counter.
+            // Generira slijedeci ticket number za ovaj queue
+            // Each queue has its own ticket number sequence : Opća medicina has 001, 002...
+            // and Blagajna independently has 001, 002.They don't share a global counter.
             var lastTicketNumber = await _context.Tickets
                 .Where(t => t.QueueId == dto.QueueId)
                 .MaxAsync(t => (int?)t.TicketNumber) ?? 0;
 
-            // Calculate estimated wait using Tier 1/2 estimation engine
+            // Izracunava procijenjeno vrijeme cekanja koristeci Tier 1/2 estimation engine
             var estimatedWait = await _estimationService
                 .CalculateEstimatedWaitAsync(dto.QueueId, position);
 
@@ -85,7 +85,7 @@ namespace SmartQueueAPI.Controllers
             _context.Tickets.Add(ticket);
             await _context.SaveChangesAsync();
 
-            // Notify all clients in this queue group
+            // Obavjestava sve klijenete iz te queue grupe
             await QueueHub.NotifyQueueUpdated(_hubContext, _estimationService, dto.QueueId);
 
             return Ok(new TicketResponseDto
@@ -102,7 +102,7 @@ namespace SmartQueueAPI.Controllers
         }
 
         // ── GET /api/ticket/{id} ──────────────────────────────────────────────
-        // Public — get ticket status (customer checks their ticket)
+        // Public — get ticket status 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -208,7 +208,7 @@ namespace SmartQueueAPI.Controllers
             // It was moved to CompleteTicket because snapshots store SERVICE TIME
             // (CompletedAt - CalledAt = time at the counter), not WAIT TIME
             // (CalledAt - CreatedAt = time in the queue). These are different.
-            // The formula uses service time — storing wait time here was wrong.
+            // The formula uses service time ,storing wait time here was wrong.
 
             // Notify all clients in this queue group
             await QueueHub.NotifyQueueUpdated(_hubContext, _estimationService, ticket.QueueId);

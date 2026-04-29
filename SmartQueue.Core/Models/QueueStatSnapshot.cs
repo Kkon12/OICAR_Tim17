@@ -10,7 +10,7 @@
         public int SampleCount { get; set; }
         public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
-        // Navigation
+        // Nav
         public Queue Queue { get; set; } = null!;
     }
 }

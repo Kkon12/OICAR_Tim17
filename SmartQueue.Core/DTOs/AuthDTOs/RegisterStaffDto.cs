@@ -5,13 +5,13 @@ namespace SmartQueue.Core.DTOs.AuthDTOs
     public class RegisterStaffDto
     {
         [Required(ErrorMessage = "First name is required.")]
-        [StringLength(100, MinimumLength = 2,
-            ErrorMessage = "First name must be between 2 and 100 characters.")]
+        [StringLength(30, MinimumLength = 2,
+            ErrorMessage = "First name must be between 2 and 30 characters.")]
         public string FirstName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Last name is required.")]
-        [StringLength(100, MinimumLength = 2,
-            ErrorMessage = "Last name must be between 2 and 100 characters.")]
+        [StringLength(30, MinimumLength = 2,
+            ErrorMessage = "Last name must be between 2 and 30 characters.")]
         public string LastName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Email is required.")]
@@ -20,7 +20,7 @@ namespace SmartQueue.Core.DTOs.AuthDTOs
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Password is required.")]
-        [StringLength(100, MinimumLength = 8,
+        [StringLength(50, MinimumLength = 8,
             ErrorMessage = "Password must be at least 8 characters.")]
         public string Password { get; set; } = string.Empty;
 

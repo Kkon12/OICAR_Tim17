@@ -2,7 +2,7 @@
 {
     public static class T
     {
-        // ── Navigation ────────────────────────────────────────────────────────
+        // ── Navigation 
         public static string Dashboard(bool hr) => hr ? "Nadzorna ploča" : "Dashboard";
         public static string Queues(bool hr) => hr ? "Redovi" : "Queues";
         public static string Staff(bool hr) => hr ? "Osoblje" : "Staff";
@@ -11,7 +11,7 @@
         public static string Queue(bool hr) => hr ? "Red" : "Queue";
         public static string Logout(bool hr) => hr ? "Odjava" : "Logout";
 
-        // ── Dashboard ─────────────────────────────────────────────────────────
+        // ── Dash
         public static string WaitingNow(bool hr) => hr ? "Čeka sada" : "Waiting Now";
         public static string ServedToday(bool hr) => hr ? "Posluženo danas" : "Served Today";
         public static string AvgWait(bool hr) => hr ? "Prosj. čekanje" : "Avg Wait Today";
@@ -24,14 +24,14 @@
         public static string ManageQueues(bool hr) => hr ? "Upravljaj redovima" : "Manage Queues";
         public static string Live(bool hr) => hr ? "Uživo" : "Live";
 
-        // ── Queue table headers ───────────────────────────────────────────────
+        // ── Queue table headers 
         public static string Status(bool hr) => hr ? "Status" : "Status";
         public static string Waiting(bool hr) => hr ? "Čeka" : "Waiting";
         public static string Completed(bool hr) => hr ? "Završeno" : "Completed";
         public static string Counters(bool hr) => hr ? "Šalteri" : "Counters";
         public static string SkipRate(bool hr) => hr ? "Preskočeno" : "Skip Rate";
 
-        // ── Queue management ──────────────────────────────────────────────────
+        // ── Queue management 
         public static string NewQueue(bool hr) => hr ? "Novi red" : "New Queue";
         public static string QueueManagement(bool hr) => hr ? "Upravljanje redovima" : "Queue Management";
         public static string CreateAndManage(bool hr) => hr ? "Kreirajte i upravljajte redovima" : "Create and manage queues";
@@ -44,7 +44,7 @@
         public static string CreateQueue(bool hr) => hr ? "Kreiraj red" : "Create Queue";
         public static string BackToQueues(bool hr) => hr ? "Natrag na redove" : "Back to Queues";
 
-        // ── Staff management ──────────────────────────────────────────────────
+        // ── Staff management 
         public static string StaffManagement(bool hr) => hr ? "Upravljanje osobljem" : "Staff Management";
         public static string AddStaff(bool hr) => hr ? "Dodaj djelatnika" : "Add Staff";
         public static string Deactivate(bool hr) => hr ? "Deaktiviraj" : "Deactivate";
@@ -56,7 +56,7 @@
         public static string Name(bool hr) => hr ? "Ime" : "Name";
         public static string Email(bool hr) => hr ? "Email" : "Email";
 
-        // ── Djelatnik ─────────────────────────────────────────────────────────
+        // ── Djelatnik
         public static string CounterDashboard(bool hr) => hr ? "Šalter nadzorna ploča" : "Counter Dashboard";
         public static string ManageCounter(bool hr) => hr ? "Upravljajte šalterom i poslužite stranke" : "Manage your counter and serve customers";
         public static string NoCounterAssigned(bool hr) => hr ? "Nema dodijeljenog šaltera" : "No counter assigned";
@@ -77,7 +77,7 @@
         public static string NoCustomers(bool hr) => hr ? "Nema stranaka u redu" : "No customers waiting";
         public static string Actions(bool hr) => hr ? "Akcije" : "Actions";
 
-        // ── Kiosk ─────────────────────────────────────────────────────────────
+        // ── Kiosk 
         public static string KioskTitle(bool hr) => hr ? "Uzmite listić" : "Take a Ticket";
         public static string KioskSubtitle(bool hr) => hr ? "Odaberite uslugu i uzmite listić" : "Select a service and take your ticket";
         public static string NoServices(bool hr) => hr ? "Trenutno nema dostupnih usluga" : "No services available right now";
@@ -87,7 +87,7 @@
         public static string StaffLogin(bool hr) => hr ? "Prijava osoblja" : "Staff Login";
         public static string TakeAnother(bool hr) => hr ? "Uzmi još jedan listić" : "Take Another Ticket";
 
-        // ── Ticket confirmation ───────────────────────────────────────────────
+        // ── Ticket confirmation 
         public static string TicketReady(bool hr) => hr ? "Vaš listić je spreman!" : "Your ticket is ready!";
         public static string TicketNumber(bool hr) => hr ? "Broj listića" : "Ticket Number";
         public static string PositionInLine(bool hr) => hr ? "Pozicija u redu" : "Position in line";
@@ -96,12 +96,12 @@
         public static string StayNearby(bool hr) => hr ? "Ostanite u blizini i slušajte kad vaš broj bude pozvan." : "Please stay nearby and listen for your number to be called.";
         public static string Minutes(bool hr) => hr ? "minuta" : "minutes";
 
-        // ── Login ─────────────────────────────────────────────────────────────
+        // ── Login 
         public static string SignIn(bool hr) => hr ? "Prijava" : "Sign In";
         public static string SignInTo(bool hr) => hr ? "Prijavite se na vaš račun" : "Sign in to your account";
         public static string Password(bool hr) => hr ? "Lozinka" : "Password";
 
-        // ── General ───────────────────────────────────────────────────────────
+        // ── General 
         public static string NoData(bool hr) => hr ? "Nema podataka" : "No data";
         public static string Error(bool hr) => hr ? "Greška" : "Error";
         public static string Loading(bool hr) => hr ? "Učitavanje..." : "Loading...";
