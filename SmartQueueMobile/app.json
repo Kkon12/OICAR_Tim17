@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "SmartQueue Mobile",
+    "slug": "smartqueue-mobile",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": ["**/*"],
+    "platforms": ["ios", "android", "web"],
+    "web": { "bundler": "metro" }
+  }
+}
