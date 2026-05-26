@@ -31,7 +31,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddDefaultTokenProviders();
 
 // ── JWT 
-// 
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 builder.Services.AddAuthentication(options =>
 {
@@ -52,14 +51,41 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(jwtKey))
     };
+
+    // ── Allow SignalR to get JWT from query string
+    // SignalR WebSocket connections cannot set headers, so the token
+    // arrives as ?access_token=... in the URL instead.
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                path.StartsWithSegments("/hubs/queue"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
-// ── Rate Limiting ─────────────────────────────────────────────────────────────
-// Protects POST api/ticket/take from being flooded.
-// A single IP can take at most 10 tickets per minute.
-// SlidingWindow prevents boundary bursts ,someone firing 10 at 0:59 and 10
-// at 1:01 would normally bypass a fixed window but not a sliding one.
-// Applied via [EnableRateLimiting("kiosk")] on the TakeTicket action only.
+// ── CORS
+// Allows the mobile app and web app to call this API from any origin.
+// During development we allow everything — tighten this in production.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MobileApp", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+// ── Rate Limiting
 builder.Services.AddRateLimiter(options =>
 {
     options.AddSlidingWindowLimiter("kiosk", limiterOptions =>
@@ -71,7 +97,6 @@ builder.Services.AddRateLimiter(options =>
         limiterOptions.QueueLimit = 2;
     });
 
-    // Return 429 with a readable JSON message instead of an empty response
     options.OnRejected = async (context, cancellationToken) =>
     {
         context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
@@ -88,26 +113,15 @@ builder.Services.AddSignalR();
 // ── Estimation Service 
 builder.Services.AddScoped<IEstimationService, EstimationService>();
 
-/*W new instance of EstimationService is created per HTTP request.*/
-
-
 // ── Controllers + Swagger 
-
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // Output datumi  "dd/MM/yyyy HH:mm:ss" u JSON odg -> konnverter
         options.JsonSerializerOptions.Converters.Add(
             new CroatianDateTimeConverter());
         options.JsonSerializerOptions.Converters.Add(
            new CroatianNullableDateTimeConverter());
     });
-
-/*This ensures every API response formats DateTime as Croatian format automatically */
- 
-
-//ZA NULLABEDATETIMECONVERTER
-/*Without registering both, nullable DateTime fields like CalledAt? would still output in default ISO format.*/
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -152,30 +166,24 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedAsync(userManager, roleManager, context);
 }
 
-/*Why pass AppDbContext to seeder: The seeder now creates Queues and Counters directly in the database — 
- * it needs the DbContext to do that. Previously it only used Identity (UserManager/RoleManager) so context wasn't needed.*/
-
-// ── Middleware pipeline 
+// ── Middleware pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// ── CORS must be BEFORE auth and controllers
+app.UseCors("MobileApp");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Rate limiter must be AFTER auth and BEFORE MapControllers so the policy
-// is enforced on every matching request before the controller action runs.
 app.UseRateLimiter();
 
 app.MapControllers();
 
-// ── SignalR Hub endpoint ──────────────────────────────────────────────────────
+// ── SignalR Hub
 app.MapHub<QueueHub>("/hubs/queue");
-
-/*Why /hubs/queue: This is the WebSocket URL clients connect to.
- * Mobile app and web frontend will connect to wss://yourserver.com/hubs/queue
- * to establish the persistent connection.*/
 
 app.Run();

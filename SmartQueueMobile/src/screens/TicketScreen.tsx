@@ -1,21 +1,234 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { StyleSheet, Text, View, Animated } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Screen } from '../components/Screen';
 import { SqCard } from '../components/SqCard';
-import { SqButton } from '../components/SqButton';
 import { PageHeader } from '../components/PageHeader';
 import { colors } from '../theme/colors';
 import { api } from '../api/api';
 import { Ticket } from '../types/models';
 
-function statusColor(status: Ticket['status']) { if (status === 'Waiting') return colors.warning; if (status === 'Called') return colors.primary; if (status === 'Done') return colors.success; if (status === 'Skipped') return colors.danger; return colors.text; }
+const STATUS_CONFIG = {
+  Waiting: {
+    label: 'Čekanje u redu',
+    color: colors.warning,
+    bg: 'rgba(245,166,35,0.10)',
+    border: 'rgba(245,166,35,0.30)',
+    icon: '◷',
+  },
+  Called: {
+    label: '📣 Vaš red je!',
+    color: '#3ecf8e',
+    bg: 'rgba(62,207,142,0.12)',
+    border: 'rgba(62,207,142,0.50)',
+    icon: '✓',
+  },
+  InService: {
+    label: 'U usluzi',
+    color: colors.primary,
+    bg: 'rgba(79,142,247,0.10)',
+    border: colors.primary,
+    icon: '▣',
+  },
+  Done: {
+    label: 'Završeno',
+    color: colors.muted,
+    bg: 'rgba(136,146,164,0.10)',
+    border: 'rgba(136,146,164,0.20)',
+    icon: '✓',
+  },
+  Skipped: {
+    label: 'Preskočeno',
+    color: colors.danger,
+    bg: 'rgba(231,76,60,0.10)',
+    border: 'rgba(231,76,60,0.30)',
+    icon: '✕',
+  },
+};
+
 export function TicketScreen() {
   const [ticket, setTicket] = useState<Ticket | null>(null);
-  const load = useCallback(() => { api.getMyTicket().then(setTicket); }, []);
-  useFocusEffect(load); useEffect(() => { const id = setInterval(load, 3000); return () => clearInterval(id); }, [load]);
-  async function simulate() { setTicket(await api.simulateProgress()); }
-  if (!ticket) return <Screen><PageHeader title="Moj ticket" subtitle="Aktivni broj i procjena čekanja." /><SqCard><Text style={styles.empty}>Nema aktivnog ticketa. Idi na Redovi i uzmi broj.</Text></SqCard></Screen>;
-  return <Screen><PageHeader title="Moj ticket"  /><SqCard style={styles.ticketCard}><Text style={styles.queueName}>{ticket.queueName}</Text><View style={styles.ticketBadge}><Text style={styles.ticketNumber}>{ticket.number}</Text></View><Text style={[styles.status, { color: statusColor(ticket.status) }]}>{ticket.status}</Text>{ticket.counterName && <Text style={styles.counter}>▣ {ticket.counterName}</Text>}</SqCard><View style={styles.grid}><SqCard style={styles.stat}><View style={styles.statIcon}><Text style={styles.statIconText}>☷</Text></View><Text style={styles.value}>{ticket.position}</Text><Text style={styles.label}>pozicija</Text></SqCard><SqCard style={styles.stat}><View style={[styles.statIcon, { backgroundColor: 'rgba(245,166,35,0.15)' }]}><Text style={[styles.statIconText, { color: colors.warning }]}>◷</Text></View><Text style={styles.value}>{ticket.estimatedWaitMinutes} min</Text><Text style={styles.label}>procjena</Text></SqCard></View><SqCard><Text style={styles.label}>Kreirano</Text><Text style={styles.created}>{ticket.createdAt}</Text></SqCard><SqButton title="Simuliraj live pomak" onPress={simulate} /><Text style={styles.note}>Kasnije se ovaj gumb miče, a promjene dolaze preko SignalR konekcije na /hubs/queue.</Text></Screen>;
+
+  async function load() {
+    const t = await api.getMyTicket();
+    setTicket(t ? { ...t } : null);
+  }
+
+  useFocusEffect(useCallback(() => { load(); }, []));
+  useEffect(() => { const id = setInterval(load, 3000); return () => clearInterval(id); }, []);
+
+  if (!ticket) {
+    return (
+      <Screen>
+        <PageHeader title="Moj ticket" subtitle="Aktivni broj i procjena čekanja." />
+        <SqCard>
+          <Text style={styles.empty}>Nema aktivnog ticketa.</Text>
+          <Text style={styles.emptyHint}>Idi na Redovi i uzmi broj.</Text>
+        </SqCard>
+      </Screen>
+    );
+  }
+
+  const cfg = STATUS_CONFIG[ticket.status] ?? STATUS_CONFIG.Waiting;
+  const isCalled = ticket.status === 'Called';
+
+  return (
+    <Screen>
+      <PageHeader title="Moj ticket" />
+
+      {/* ── Main ticket card — changes dramatically when Called */}
+      <View style={[
+        styles.mainCard,
+        { borderColor: cfg.border, backgroundColor: cfg.bg },
+        isCalled && styles.mainCardCalled,
+      ]}>
+        <Text style={styles.queueName}>{ticket.queueName}</Text>
+
+        {/* Big ticket number */}
+        <View style={[styles.numberBadge, { borderColor: cfg.color }]}>
+          <Text style={[styles.numberText, { color: cfg.color }]}>
+            {ticket.number}
+          </Text>
+        </View>
+
+        {/* Status label */}
+        <Text style={[styles.statusLabel, { color: cfg.color }]}>
+          {cfg.label}
+        </Text>
+
+        {/* Counter — only shows when Called */}
+        {ticket.counterName && (
+          <View style={[styles.counterBadge, { borderColor: cfg.color }]}>
+            <Text style={[styles.counterText, { color: cfg.color }]}>
+              {ticket.counterName}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* ── Stats row — hide when Done/Called */}
+      {(ticket.status === 'Waiting') && (
+        <View style={styles.statsRow}>
+          <SqCard style={styles.stat}>
+            <Text style={styles.statIcon}>☷</Text>
+            <Text style={styles.statValue}>{ticket.position}</Text>
+            <Text style={styles.statLabel}>pozicija u redu</Text>
+          </SqCard>
+          <SqCard style={styles.stat}>
+            <Text style={[styles.statIcon, { color: colors.warning }]}>◷</Text>
+            <Text style={styles.statValue}>{ticket.estimatedWaitMinutes}</Text>
+            <Text style={styles.statLabel}>min čekanja</Text>
+          </SqCard>
+        </View>
+      )}
+
+      {/* ── Created at */}
+      <SqCard style={styles.metaCard}>
+        <Text style={styles.metaLabel}>Preuzet</Text>
+        <Text style={styles.metaValue}>{ticket.createdAt}</Text>
+      </SqCard>
+
+    </Screen>
+  );
 }
-const styles = StyleSheet.create({ empty: { color: colors.muted, textAlign: 'center' }, ticketCard: { alignItems: 'center', gap: 14 }, queueName: { color: colors.text, fontSize: 19, fontWeight: '800' }, ticketBadge: { borderColor: colors.primary, borderWidth: 2, borderRadius: 16, paddingVertical: 26, paddingHorizontal: 50, backgroundColor: 'rgba(79,142,247,0.10)' }, ticketNumber: { color: colors.primary, fontSize: 78, fontWeight: '900', letterSpacing: -2 }, status: { fontSize: 18, fontWeight: '900' }, counter: { color: colors.text, fontSize: 16, fontWeight: '700' }, grid: { flexDirection: 'row', gap: 12 }, stat: { flex: 1 }, statIcon: { width: 44, height: 44, borderRadius: 10, backgroundColor: 'rgba(79,142,247,0.15)', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }, statIconText: { color: colors.primary, fontSize: 20, fontWeight: '900' }, value: { color: colors.text, fontSize: 25, fontWeight: '900' }, label: { color: colors.muted, fontSize: 13, fontWeight: '700' }, created: { color: colors.text, marginTop: 4 }, note: { color: colors.muted, textAlign: 'center', fontSize: 12 } });
+
+const styles = StyleSheet.create({
+  empty: { color: colors.text, textAlign: 'center', fontSize: 16, fontWeight: '700', marginBottom: 6 },
+  emptyHint: { color: colors.muted, textAlign: 'center', fontSize: 14 },
+
+  mainCard: {
+    borderWidth: 2,
+    borderRadius: 20,
+    padding: 28,
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 14,
+  },
+  mainCardCalled: {
+    shadowColor: '#3ecf8e',
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+
+  queueName: {
+    color: colors.muted,
+    fontSize: 14,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+  },
+
+  numberBadge: {
+    borderWidth: 3,
+    borderRadius: 20,
+    paddingVertical: 24,
+    paddingHorizontal: 52,
+  },
+  numberText: {
+    fontSize: 86,
+    fontWeight: '900',
+    letterSpacing: -3,
+  },
+
+  statusLabel: {
+    fontSize: 20,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+
+  counterBadge: {
+    borderWidth: 1.5,
+    borderRadius: 99,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    marginTop: 4,
+  },
+  counterText: {
+    fontSize: 15,
+    fontWeight: '800',
+  },
+
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 14,
+  },
+  stat: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 6,
+  },
+  statIcon: {
+    color: colors.primary,
+    fontSize: 22,
+    fontWeight: '900',
+  },
+  statValue: {
+    color: colors.text,
+    fontSize: 28,
+    fontWeight: '900',
+  },
+  statLabel: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+
+  metaCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  metaLabel: {
+    color: colors.muted,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  metaValue: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+});
