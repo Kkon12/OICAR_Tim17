@@ -1,0 +1,10 @@
+export const Platform = { OS: 'web', select: (values: Record<string, unknown>) => values.web ?? values.default };
+export const StyleSheet = { create: <T>(styles: T) => styles };
+export const Alert = { alert: jest.fn() };
+export const ActivityIndicator = 'ActivityIndicator';
+export const Pressable = 'Pressable';
+export const SafeAreaView = 'SafeAreaView';
+export const ScrollView = 'ScrollView';
+export const Text = 'Text';
+export const TextInput = 'TextInput';
+export const View = 'View';
