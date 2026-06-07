@@ -317,27 +317,3 @@ namespace SmartQueueAPI.Controllers
     }
 }
 
-/*
-Why [Authorize(Roles = "Admin,Djelatnik")] at controller level:
- * All stats endpoints require at least Djelatnik — no public access to operational data.
- * Individual endpoints that are Admin-only add an extra [Authorize(Roles = "Admin")] on top.
-
-Why BuildQueueSummary is a private static helper: 
-* Both GetOverview and GetQueueStats need the same queue summary calculation.
-* Extracting it to a private method avoids duplicating ~40 lines of logic.
-
-
-Why DefaultIfEmpty(0) on averages: If there are no completed tickets yet,
- * .Average() on an empty collection throws an exception.
- * DefaultIfEmpty(0) returns 0 instead — safe for fresh queues with no data.
-  
- 
-Why GetTrend accepts days parameter: Admins might want last 7 days, last 30 days or last 90 days.
- * Making it a query parameter with default 30 gives flexibility without needing multiple endpoints.
- 
-Why calculate AvgServiceMinutesToday separately from AvgWaitMinutesToday:
- * Wait time = CreatedAt → CalledAt (how long customer waited). 
- * Service time = CalledAt → CompletedAt (how long the actual service took).
- * Both are important but measure different things — wait time affects customer experience, 
- * service time affects staff efficiency.
-*/

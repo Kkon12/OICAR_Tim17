@@ -19,11 +19,11 @@ ADMIN_PASSWORD = "Admin123!"
 QUEUE_ID = 1
 
 # How many tickets to take during the simulation
-NUM_TICKETS = 25
+NUM_TICKETS = 11
 
 # Simulated service time range in seconds (not real minutes -- speeds up the demo)
-MIN_SERVICE_SEC = 180  #default je bilo 3 ,180 3 min
-MAX_SERVICE_SEC = 420 #=7min  
+MIN_SERVICE_SEC = 30 #default je bilo 3 ,180 3 min
+MAX_SERVICE_SEC = 70 #=7min  
 
 # Pause between each new ticket being taken
 TICKET_DELAY_SEC = 1

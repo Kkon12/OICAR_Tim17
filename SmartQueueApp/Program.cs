@@ -35,15 +35,15 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.Name = "SmartQueue.Auth";
         options.Cookie.HttpOnly = true;
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-        options.Cookie.SameSite = SameSiteMode.Lax; // ← was Strict, caused redirect loop
+        options.Cookie.SameSite = SameSiteMode.Lax;
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
         options.Events = new Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationEvents
         {
-            // Prevent redirect loop — return 401 for API calls 
+            
             OnRedirectToLogin = ctx =>
             {
-                // Only redirect browser requests, not API/ajax
+                
                 if (!ctx.Request.Path.StartsWithSegments("/api"))
                     ctx.Response.Redirect(ctx.RedirectUri);
                 else
@@ -60,14 +60,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddAuthorization(); 
 
-// ── MVC ───────────────────────────────────────────────────────────────────────
+// ── MVC
 builder.Services.AddControllersWithViews(options =>
 {
-    // Global antiforgery on all POST/PUT/PATCH/DELETE
+    
     options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute());
 });
 
-// ── Session (for flash messages) ──────────────────────────────────────────────
+// Flash poruke
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -77,7 +77,7 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// ── Middleware Pipeline ───────────────────────────────────────────────────────
+// MiddleWare
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/home/error");
@@ -97,22 +97,3 @@ app.MapControllerRoute(
 
 app.Run();
 
-
-
-
-/*
- * Why HttpOnly cookie: JavaScript cannot read or steal the token
- * — eliminates the most common XSS attack vector against JWT auth.
-
-
-Why SameSite = Strict: Prevents CSRF attacks — the cookie is only sent on same-site requests,
-* malicious cross-site forms cannot use it.
-
-Why AutoValidateAntiforgeryToken globally:
-* Every POST/PATCH/DELETE form must include a valid antiforgery token
-* — protects all forms automatically without needing [ValidateAntiForgeryToken] on every action.
-
-Why 8-hour session: Matches a full working shift — Djelatnik doesn't get logged out mid-day.
-
-Why AddSession: Used for flash messages 
-* — success/error notifications that survive a redirect (Post-Redirect-Get pattern).*/

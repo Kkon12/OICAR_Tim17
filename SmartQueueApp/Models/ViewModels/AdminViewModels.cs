@@ -26,8 +26,7 @@ namespace SmartQueueApp.Models.ViewModels
         public QueuePeakHoursDto? PeakHours { get; set; }
         public List<CounterStatsDto> CounterStats { get; set; } = new();
 
-        // Available staff pre-loaded so the assign dropdown renders without
-        // a separate request per counter row.
+
         public List<UserResponseDto> AvailableStaff { get; set; } = new();
 
         public string? ErrorMessage { get; set; }
@@ -63,9 +62,7 @@ namespace SmartQueueApp.Models.ViewModels
         public string? ErrorMessage { get; set; }
     }
 
-    // ── NEW: used by the inline assign form on QueueDetail ────────────────────
-    // Keeps counterId + queueId + the chosen userId together so the controller
-    // can call the API and redirect back to the right queue detail page.
+
     public class AssignCounterViewModel
     {
         public int CounterId { get; set; }

@@ -167,8 +167,7 @@ namespace SmartQueueApp.Controllers
         }
 
         // ── POST /admin/counter/{id}/assign ───────────────────────────────────
-        // NEW: assign (or reassign) a Djelatnik to an existing counter inline
-        // from the QueueDetail page — no separate page needed.
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignCounter(AssignCounterViewModel model)
@@ -295,27 +294,3 @@ namespace SmartQueueApp.Controllers
     }
 }
 
-/*
- * CHANGES FROM PREVIOUS VERSION
- * ─────────────────────────────
- * 1. QueueDetail — added staffTask to the Task.WhenAll block so active
- *    Djelatnik accounts are loaded alongside counters. Stored in
- *    AdminQueueDetailViewModel.AvailableStaff for the assign dropdown.
- *
- * 2. AssignCounter (NEW POST action) — calls AssignUserToCounterAsync with
- *    the chosen UserId, then redirects back to QueueDetail. The form lives
- *    inline in the counter table row in QueueDetail.cshtml — no separate page.
- *
- * WHY INLINE ASSIGN INSTEAD OF A SEPARATE PAGE
- * ──────────────────────────────────────────────
- * Assigning a staff member is a one-field operation (pick from a dropdown).
- * A dedicated page would add unnecessary navigation. The inline dropdown in
- * the counter row keeps the admin on the queue detail page and the interaction
- * is immediate — select + submit, done.
- *
- * WHY Task.WhenAll WITH 6 TASKS NOW
- * ───────────────────────────────────
- * Adding staffTask to the parallel block costs nothing — all 6 calls fire
- * simultaneously. The total page load time is still determined by the slowest
- * single call, not the sum of all calls.
- */

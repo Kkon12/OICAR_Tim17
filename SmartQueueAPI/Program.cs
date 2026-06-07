@@ -52,9 +52,7 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(jwtKey))
     };
 
-    // ── Allow SignalR to get JWT from query string
-    // SignalR WebSocket connections cannot set headers, so the token
-    // arrives as ?access_token=... in the URL instead.
+    
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
@@ -72,16 +70,23 @@ builder.Services.AddAuthentication(options =>
 });
 
 // ── CORS
-// Allows the mobile app and web app to call this API from any origin.
-// During development we allow everything — tighten this in production.
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MobileApp", policy =>
     {
+      
         policy
-            .AllowAnyOrigin()
+            .WithOrigins(
+                "http://localhost:5174",
+                "http://localhost:5173",
+                "http://localhost:8081",
+                "http://localhost:19006",
+                "http://localhost:3000"
+            )
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -173,7 +178,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// ── CORS must be BEFORE auth and controllers
+// ── CORS 
 app.UseCors("MobileApp");
 
 app.UseAuthentication();

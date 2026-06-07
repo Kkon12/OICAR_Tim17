@@ -17,7 +17,3 @@ namespace SmartQueueApp.Models.ViewModels
         public string? ErrorMessage { get; set; }
     }
 }
-
-/*Why ViewModel instead of LoginDto: ViewModels are for the View layer
- * — they include UI-specific fields like ErrorMessage and ReturnUrl that the API DTO doesn't need.
- * Separation of concerns.*/

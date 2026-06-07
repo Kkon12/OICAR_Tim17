@@ -69,8 +69,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await callAuth('login', { email, password });
       console.log('LOGIN RESPONSE:', JSON.stringify(data));
 
-      const token = data.accessToken ?? data.token ?? data.access_token;
-      const refresh = data.refreshToken ?? data.refresh_token ?? data.refreshtoken;
+      const token = data.Token ?? data.accessToken ?? data.token ?? data.access_token;
+      const refresh = data.RefreshToken ?? data.refreshToken ?? data.refresh_token ?? data.refreshtoken;
 
       if (!token) throw new Error('No access token in response');
 
@@ -98,8 +98,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await callAuth('login', { email, password });
       console.log('REGISTER/LOGIN RESPONSE:', JSON.stringify(data));
 
-      const token = data.accessToken ?? data.token ?? data.access_token;
-      const refresh = data.refreshToken ?? data.refresh_token ?? data.refreshtoken;
+      const token = data.Token ?? data.accessToken ?? data.token ?? data.access_token;
+      const refresh = data.RefreshToken ?? data.refreshToken ?? data.refresh_token ?? data.refreshtoken;
 
       if (!token) throw new Error('No access token in response');
 

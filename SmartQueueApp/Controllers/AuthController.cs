@@ -23,9 +23,7 @@ namespace SmartQueueApp.Controllers
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
-            // Only redirect if BOTH cookie auth AND a valid token exist.
-            // Checking both prevents a loop where the cookie is present but
-            // the JWT is already expired.
+           
             if (User.Identity?.IsAuthenticated == true
                 && !string.IsNullOrEmpty(_tokenService.GetJwt())
                 && !_tokenService.IsJwtExpired())
@@ -56,11 +54,6 @@ namespace SmartQueueApp.Controllers
 
             var auth = result.Data!;
 
-            // Store JWT + refresh token in HttpOnly cookies.
-            // User ID is NOT stored in a cookie — it is decoded from the JWT
-            // claims on demand via TokenService.GetUserId(). This prevents the
-            // bug where storing auth.Email as userId caused counter lookups to
-            // compare an email string against a GUID and never match.
             _tokenService.StoreTokens(
                 auth.Token,
                 auth.RefreshToken,
@@ -68,12 +61,7 @@ namespace SmartQueueApp.Controllers
                 auth.FirstName,
                 auth.LastName);
 
-            // Also sign into ASP.NET Core cookie auth so [Authorize] and
-            // User.IsInRole() work in controllers and Razor views.
-            // NameIdentifier is intentionally left as the Email here because
-            // it is used only for display / identity purposes in the MVC layer.
-            // Privileged lookups (counter assignment) use TokenService.GetUserId()
-            // which reads the GUID directly from the JWT "sub" claim.
+
             var claims = new List<Claim>
             {
                 new(ClaimTypes.Name,           auth.Email),
@@ -141,25 +129,3 @@ namespace SmartQueueApp.Controllers
     }
 }
 
-/*
- * CHANGES FROM PREVIOUS VERSION
- * ─────────────────────────────
- * 1. StoreTokens() call lost the userId argument — the signature no longer
- *    takes one. User ID is now decoded from JWT claims in TokenService.GetUserId().
- *
- * 2. Login GET guard also checks IsJwtExpired() to prevent a redirect loop
- *    where the ASP.NET Core cookie is still valid but the JWT has expired —
- *    in that case the user should be shown the login page, not redirected.
- *
- * WHY TWO AUTH LAYERS (StoreTokens + SignInAsync)
- * ────────────────────────────────────────────────
- * StoreTokens puts the JWT in an HttpOnly cookie for API call authentication.
- * SignInAsync creates the ASP.NET Core identity that powers [Authorize] and
- * User.IsInRole() in Razor views. Both are required — they serve different
- * purposes and neither alone is sufficient.
- *
- * WHY Url.IsLocalUrl(returnUrl)
- * ──────────────────────────────
- * Prevents open-redirect attacks. A crafted returnUrl=https://evil.com would
- * pass the null check but IsLocalUrl() rejects any absolute external URL.
- */

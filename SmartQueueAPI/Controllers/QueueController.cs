@@ -175,17 +175,3 @@ namespace SmartQueueAPI.Controllers
     }
 }
 
-/*Why [Authorize(Roles = "Admin")] only on write operations: 
- * Reading queue info is public — kiosk tablets and mobile apps need to list queues without logging in.
- * Only creating, updating and deleting requires Admin role.
- --
-Why CreatedAtAction on POST: Returns HTTP 201 Created with a Location header pointing to the new resource
-— this is the correct REST standard for resource creation.
-** --
-
-Why PATCH for status instead of PUT: PUT replaces the entire resource.
--PATCH updates a single field — changing just the status without needing to send the full queue object.
-Cleaner and more intentional.
---
-Why Include(q => q.Tickets).Include(q => q.Counters):
-Needed to calculate TotalWaiting and OpenCounters in the response. Without Include, EF Core won't load related data.*/

@@ -12,7 +12,7 @@
 
         // ── Wait time estimation fields ───────────────────────────────────────
         public int DefaultServiceMinutes { get; set; } = 5;   // Admin fallback
-        public int MinTicketsForStats { get; set; } = 20;     // when to trust real data
+        public int MinTicketsForStats { get; set; } = 20;     // when to trust real data (nakon 20 ide tier 2 odnosno nije hardlimit nego sukladno se postupno koriste live podaci)
 
         // Navigation
         public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();

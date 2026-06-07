@@ -22,7 +22,7 @@
 
         public bool IsHr => CurrentLanguage == "hr";
 
-        // ── Generic translator ────────────────────────────────────────────────
+        // ── Generic translator 
         public string T(string en, string hr)
             => IsHr ? hr : en;
     }

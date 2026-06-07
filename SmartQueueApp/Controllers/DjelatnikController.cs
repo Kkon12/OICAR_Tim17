@@ -22,14 +22,10 @@ namespace SmartQueueApp.Controllers
         // ── GET /djelatnik ────────────────────────────────────────────────────
         public async Task<IActionResult> Index()
         {
-            // FIX: was a N+1 loop — called GetQueuesAsync() then
-            // GetCountersAsync(queueId) for every queue until a match was found.
-            // Every action (call, complete, skip) redirects here, so this fired
-            // on every single button click. With 5 queues = 6 HTTP calls each time.
-            // Now: 1 call to GetMyCounterAsync() + 1 call for tickets = 2 total.
+           
             var counterResult = await _api.GetMyCounterAsync();
 
-            // 404 = no counter assigned — valid state, not an error
+           
             if (!counterResult.Success && counterResult.StatusCode != 404)
                 return View(new DjelatnikDashboardViewModel
                 {
@@ -38,28 +34,27 @@ namespace SmartQueueApp.Controllers
 
             var myCounter = counterResult.Data;
             List<TicketResponseDto> waitingTickets = new();
+            TicketResponseDto? currentTicket = null;
 
             if (myCounter != null)
             {
-                // Load waiting tickets for the counter's queue
-                var tickets = await _api.GetQueueTicketsAsync(myCounter.QueueId);
-                if (tickets.Success && tickets.Data != null)
-                    waitingTickets = tickets.Data;
-            }
+             
+                var waitingResult = await _api.GetQueueTicketsAsync(myCounter.QueueId);
+                if (waitingResult.Success && waitingResult.Data != null)
+                    waitingTickets = waitingResult.Data;
 
-            // Separate "currently being served" from the waiting queue.
-            // Called / InService tickets shown at top; Waiting tickets in table.
-            var currentTicket = waitingTickets
-                .FirstOrDefault(t => t.Status == "Called"
-                                  || t.Status == "InService");
+                
+                var calledResult = await _api.GetCalledTicketForCounterAsync(myCounter.Id);
+                if (calledResult.Success && calledResult.Data != null)
+                    currentTicket = calledResult.Data;
+            }
 
             return View(new DjelatnikDashboardViewModel
             {
                 MyCounter = myCounter,
-                WaitingTickets = waitingTickets
-                    .Where(t => t.Status == "Waiting")
-                    .ToList(),
-                CurrentTicket = currentTicket
+                WaitingTickets = waitingTickets,
+                CurrentTicket = currentTicket,
+                SignalRToken = _tokenService.GetJwt() ?? string.Empty
             });
         }
 
@@ -131,31 +126,3 @@ namespace SmartQueueApp.Controllers
     }
 }
 
-/*
- * CHANGES FROM PREVIOUS VERSION
- * ─────────────────────────────
- * Index() — replaced N+1 loop with GetMyCounterAsync() + GetQueueTicketsAsync().
- *
- * Before:
- *   GetQueuesAsync()                          → 1 call
- *   GetCountersAsync(queue.Id) per queue      → N calls
- *   GetQueueTicketsAsync(queue.Id) on match   → 1 call
- *   Total: N+2 calls on every page load and every action redirect.
- *
- * After:
- *   GetMyCounterAsync()                       → 1 call (GET api/counter/mine)
- *   GetQueueTicketsAsync(counter.QueueId)     → 1 call
- *   Total: 2 calls always, regardless of queue count.
- *
- * WHY 404 IS NOT AN ERROR
- * ────────────────────────
- * GetMyCounterAsync() returns 404 when no counter is assigned to this user.
- * That is a normal, expected state — the Djelatnik simply hasn't been assigned
- * yet. The view handles it with the "No counter assigned" empty state card.
- * Only non-404 failures (503, 401, etc.) show an error message.
- *
- * WHY [Authorize(Roles = "Djelatnik,Admin")]
- * ───────────────────────────────────────────
- * Admins need access to test counter operations and provide oversight.
- * Role-based UI differences are handled in the layout, not by blocking here.
- */

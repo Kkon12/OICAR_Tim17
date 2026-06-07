@@ -30,9 +30,7 @@ namespace SmartQueueAPI.Controllers
             _hubContext = hubContext;
         }
 
-        /* Why inject IHubContext<QueueHub>: Controllers cannot directly call
-         * Hub methods — IHubContext is the correct way for server-side code to push messages to connected clients.*/
-
+       
         // ── POST /api/ticket/take ─────────────────────────────────────────────
         // Public — anonimni ili registrirani user uzima ticket
         // [EnableRateLimiting] aktivira sliding window policy iz program.csa
@@ -61,8 +59,7 @@ namespace SmartQueueAPI.Controllers
                               && t.Status == TicketStatus.Waiting) + 1;
 
             // Generira slijedeci ticket number za ovaj queue
-            // Each queue has its own ticket number sequence : Opća medicina has 001, 002...
-            // and Blagajna independently has 001, 002.They don't share a global counter.
+          
             var lastTicketNumber = await _context.Tickets
                 .Where(t => t.QueueId == dto.QueueId)
                 .MaxAsync(t => (int?)t.TicketNumber) ?? 0;
@@ -175,8 +172,8 @@ namespace SmartQueueAPI.Controllers
             return Ok(response);
         }
 
-        // ── PATCH /api/ticket/{id}/call ───────────────────────────────────────
-        // Djelatnik — call a ticket to their counter
+        // ── PATCH /api/ticket/{id}/call 
+        
         [HttpPatch("{id}/call")]
         [Authorize(Roles = "Admin,Djelatnik")]
         public async Task<IActionResult> CallTicket(int id,
@@ -191,6 +188,24 @@ namespace SmartQueueAPI.Controllers
 
             if (ticket.Status != TicketStatus.Waiting)
                 return BadRequest(new { message = $"Ticket is already {ticket.Status}." });
+            //auto complete za svaki prijesnje pozvani (called) ticket na ovom salteru
+            //zvati slijedeci tiket implicitno znaci da je onaj prije Done!
+
+
+            Ticket? previousCalled = null;
+            if (dto.CounterId.HasValue)
+            {
+                previousCalled = await _context.Tickets
+                    .FirstOrDefaultAsync(t => t.CounterId == dto.CounterId
+                                           && t.Status == TicketStatus.Called
+                                           && t.Id != id);
+
+                if (previousCalled != null)
+                {
+                    previousCalled.Status = TicketStatus.Done;
+                    previousCalled.CompletedAt = DateTime.UtcNow;
+                }
+            }
 
             ticket.Status = TicketStatus.Called;
             ticket.CalledAt = DateTime.UtcNow;
@@ -202,7 +217,26 @@ namespace SmartQueueAPI.Controllers
             ticket.ActualWaitMinutes = (int)(ticket.CalledAt.Value
                 - ticket.CreatedAt).TotalMinutes;
 
+            // ── Save both ticket changes atomically ───────────────────────────
+            // previousCalled.Status = Done and new ticket.Status = Called are
+            // saved together. If this fails, neither change is persisted —
+            // no partial state in the DB.
             await _context.SaveChangesAsync();
+
+            // ── Update Tier 2 snapshots AFTER the DB save ─────────────────────
+            // Snapshots are updated after SaveChangesAsync so that if the DB
+            // save fails, no snapshot data is written for a ticket that wasn't
+            // actually completed. Service time is capped at 120 minutes to
+            // prevent tickets that were stuck as Called for hours (due to the
+            // previous bug) from corrupting snapshot averages.
+            if (previousCalled?.CalledAt.HasValue == true)
+            {
+                var serviceMinutes = Math.Min(
+                    (previousCalled.CompletedAt!.Value - previousCalled.CalledAt.Value).TotalMinutes,
+                    120.0);
+                await _estimationService.UpdateStatSnapshotsAsync(
+                    previousCalled.QueueId, serviceMinutes);
+            }
 
             // NOTE: UpdateStatSnapshotsAsync is intentionally NOT called here.
             // It was moved to CompleteTicket because snapshots store SERVICE TIME
@@ -393,22 +427,3 @@ namespace SmartQueueAPI.Controllers
     }
 }
 
-/*Why TakeTicket is public: Kiosk tablets and mobile app users take tickets without logging in.
- * Authentication is optional — if UserId is provided it gets linked, otherwise it's anonymous.
-Why we calculate lastTicketNumber per queue:
- -- Each queue has its own ticket number sequence — Opća medicina has 001, 002... and Blagajna
-    independently has 001, 002... They don't share a global counter.
-Why ActualWaitMinutes is set on CallTicket:
- -- The actual wait is from CreatedAt (when ticket was taken) to CalledAt (when Djelatnik calls them).
- -- This is the ground truth queue wait data — stored for ML training later.
-Why UpdateStatSnapshotsAsync moved to CompleteTicket:
- -- Snapshots store SERVICE TIME (time at the counter = CompletedAt - CalledAt).
- -- Previously it was called on CallTicket with ActualWaitMinutes (queue wait time).
- -- These are two different things — confusing them made snapshot averages wrong.
- -- Service time is only knowable after completion, so CompleteTicket is the right place.
-Why skipped tickets don't update snapshots:
- -- No service occurred. Including skips would corrupt averages with zero-duration entries.
-Why separate call, complete and skip endpoints:
- -- Each is a distinct business action with different logic — calling sets CalledAt and CounterId,
-    completing sets CompletedAt and updates Tier 2 snapshots, skipping just marks absent.
- -- Keeping them separate makes each action clear and auditable.*/

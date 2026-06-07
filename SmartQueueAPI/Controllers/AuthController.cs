@@ -361,18 +361,3 @@ namespace SmartQueueAPI.Controllers
     }
 }
 
-/*Why GET /api/auth/me: Every authenticated user needs to know who they are — their role, name and ID.
- * The MVC frontend will call this on login to decide which views to show (Admin panel vs Djelatnik panel).
- * No need to decode the JWT client-side.
---
-Why soft delete (deactivate) instead of hard delete: 
- * Deleting a Djelatnik would orphan all their historical ticket data — CounterId references would break.
- * Deactivation via LockoutEnd uses Identity's built-in lockout mechanism 
- * — the user simply cannot login but all their data is preserved.
---
-Why LockoutEnd.AddYears(100): Identity's lockout mechanism uses a date 
- * — setting it 100 years in the future is effectively permanent 
- * deactivation while still using the built-in system correctly.
---
-Why prevent self-deactivation: An Admin accidentally locking themselves out would
- * require direct database intervention to recover. This guard prevents that scenario entirely.*/

@@ -33,9 +33,14 @@ namespace SmartQueueAPI.Services
             return await CalculateEstimatedWaitAsync(queueId, newPosition);
         }
 
-      
+
         public async Task UpdateStatSnapshotsAsync(int queueId, double actualServiceMinutes)
         {
+            // Cap at 120 minutes — defence-in-depth guard so that no caller
+            // (auto-complete, CompleteTicket, or future code) can write a
+            // corrupted average into the snapshot store, regardless of how
+            // the value was computed before being passed in.
+            actualServiceMinutes = Math.Min(actualServiceMinutes, 120.0);
             var now = DateTime.UtcNow;
             var dayOfWeek = now.DayOfWeek;
             var hour = now.Hour;
@@ -62,7 +67,7 @@ namespace SmartQueueAPI.Services
             else
             {
                 // Rolling average 
-               
+
                 var totalMinutes = snapshot.AvgServiceMinutes * snapshot.SampleCount
                                    + actualServiceMinutes;
                 snapshot.SampleCount++;
@@ -157,8 +162,15 @@ namespace SmartQueueAPI.Services
             }
             else
             {
+                // Cap individual service times at 120 minutes before averaging.
+                // Tickets that were stuck as Called for hours (due to the old bug where
+                // the previous Called ticket was never auto-completed) would otherwise
+                // produce wildly wrong averages like ~52000 min. 120 min is a safe upper
+                // bound for any real service interaction.
                 var realAvg = completedTickets
-                    .Average(t => (t.CompletedAt!.Value - t.CalledAt!.Value).TotalMinutes);
+                    .Average(t => Math.Min(
+                        (t.CompletedAt!.Value - t.CalledAt!.Value).TotalMinutes,
+                        120.0));
 
                 if (count >= queue.MinTicketsForStats)
                 {

@@ -12,7 +12,7 @@ using SmartQueue.Core.DTOs.TicketDTOs;
 
 namespace SmartQueueApp.Services
 {
-    // ── Croatian DateTime Converters ──────────────────────────────────────────
+    // ── Croatian DateTime
     public class CroatianDateTimeConverter : JsonConverter<DateTime>
     {
         private const string Format = "dd/MM/yyyy HH:mm:ss";
@@ -61,7 +61,7 @@ namespace SmartQueueApp.Services
         }
     }
 
-    // ── ApiService ────────────────────────────────────────────────────────────
+    // ── ApiService
     public class ApiService : IApiService
     {
         private readonly IHttpClientFactory _factory;
@@ -90,7 +90,7 @@ namespace SmartQueueApp.Services
             _logger = logger;
         }
 
-        // ── Core HTTP helpers ─────────────────────────────────────────────────
+        // ── Core HTTP helpers 
 
         private HttpClient CreateClient()
         {
@@ -107,15 +107,7 @@ namespace SmartQueueApp.Services
         {
             try
             {
-                // KEY FIX: only attempt refresh when a token actually exists.
-                // If hasToken is false the request is intentionally anonymous
-                // (e.g. kiosk loading queues, kiosk taking a ticket).
-                // The API itself is the authoritative gate for those endpoints.
-                //
-                // BEFORE this fix: IsJwtExpired() returned true for anonymous
-                // requests (no cookie = "expired"), causing TryRefreshTokenAsync
-                // to fail and short-circuit with "Session expired" before the
-                // request ever left the app — breaking the entire kiosk flow.
+
                 var hasToken = !string.IsNullOrEmpty(_tokenService.GetJwt());
                 if (hasToken && _tokenService.IsJwtExpired() && !url.Contains("auth"))
                 {
@@ -218,8 +210,7 @@ namespace SmartQueueApp.Services
             await _refreshLock.WaitAsync();
             try
             {
-                // Re-check inside the lock — another thread may have refreshed
-                // already while this one was waiting.
+
                 if (!_tokenService.IsJwtExpired()) return true;
 
                 var jwt = _tokenService.GetJwt();
@@ -243,9 +234,6 @@ namespace SmartQueueApp.Services
 
                 if (authResp == null) return false;
 
-                // FIX: StoreTokens no longer takes a userId parameter.
-                // The user ID is decoded from the new JWT itself via
-                // TokenService.GetUserId() — always in sync with the API.
                 _tokenService.StoreTokens(
                     authResp.Token,
                     authResp.RefreshToken,
@@ -348,6 +336,23 @@ namespace SmartQueueApp.Services
             => await SendAsync<List<TicketResponseDto>>(
                 HttpMethod.Get, $"api/ticket/queue/{queueId}");
 
+        public async Task<ApiResult<TicketResponseDto?>> GetCalledTicketForCounterAsync(
+            int counterId)
+        {
+            var result = await SendAsync<TicketHistoryResponseDto>(
+                HttpMethod.Get,
+                $"api/ticket/history?Status=Called&PageSize=1");
+
+            if (!result.Success)
+                return ApiResult<TicketResponseDto?>.Fail(result.ErrorMessage, result.StatusCode);
+
+            var ticket = result.Data?.Tickets?
+                .FirstOrDefault(t => t.CounterId == counterId
+                                  && (t.Status == "Called" || t.Status == "InService"));
+
+            return ApiResult<TicketResponseDto?>.Ok(ticket);
+        }
+
         public async Task<ApiResult<bool>> CallTicketAsync(
             int id, UpdateTicketStatusDto dto)
             => await SendAsync<bool>(
@@ -435,30 +440,3 @@ namespace SmartQueueApp.Services
     }
 }
 
-/*
- * CHANGES FROM PREVIOUS VERSION
- * ─────────────────────────────
- * 1. SendAsync — added `var hasToken` guard before the JWT expiry check.
- *    Previously: no JWT cookie → IsJwtExpired() returns true → refresh fails
- *    → "Session expired" returned before any network call — kiosk broken.
- *    Now: no JWT cookie → skip the whole block → request goes to API → API
- *    decides (public endpoint passes, protected endpoint returns 401 normally).
- *
- * 2. TryRefreshTokenAsync — removed userId from StoreTokens() call.
- *    AuthResponseDto has no UserId field. The user ID now lives exclusively
- *    in the JWT claims and is read via TokenService.GetUserId().
- *
- * WHY SemaphoreSlim ON REFRESH
- * ─────────────────────────────
- * Without it, multiple concurrent requests with an expired token all race to
- * refresh simultaneously — each call revokes the previous refresh token,
- * causing all but one to fail. The lock serializes this to exactly one refresh.
- *
- * WHY hasToken && NOT just removing the check entirely
- * ─────────────────────────────────────────────────────
- * The expiry check must still fire for authenticated users whose token has
- * genuinely expired mid-session. Removing it entirely would let stale tokens
- * keep hitting authenticated API endpoints until the API rejects them with a
- * 401, which would surface as a confusing error rather than a clean redirect
- * to login. The guard only bypasses the check when there is genuinely no token.
- */

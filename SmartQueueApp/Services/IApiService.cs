@@ -6,7 +6,7 @@ using SmartQueue.Core.DTOs.TicketDTOs;
 
 namespace SmartQueueApp.Services
 {
-    // Generic result wrapper — never throws, always returns success/failure
+   
     public class ApiResult<T>
     {
         public bool Success { get; set; }
@@ -47,6 +47,7 @@ namespace SmartQueueApp.Services
         Task<ApiResult<TicketResponseDto>> TakeTicketAsync(TakeTicketDto dto);
         Task<ApiResult<TicketResponseDto>> GetTicketAsync(int id);
         Task<ApiResult<List<TicketResponseDto>>> GetQueueTicketsAsync(int queueId);
+        Task<ApiResult<TicketResponseDto?>> GetCalledTicketForCounterAsync(int counterId);
         Task<ApiResult<bool>> CallTicketAsync(int id, UpdateTicketStatusDto dto);
         Task<ApiResult<bool>> CompleteTicketAsync(int id);
         Task<ApiResult<bool>> SkipTicketAsync(int id);
@@ -57,9 +58,7 @@ namespace SmartQueueApp.Services
         Task<ApiResult<List<CounterResponseDto>>> GetCountersAsync(int queueId);
         Task<ApiResult<CounterResponseDto>> GetCounterAsync(int id);
 
-        // Single call to find the counter assigned to the current user.
-        // Replaces the N+1 loop in DjelatnikController that called GetQueuesAsync()
-        // + GetCountersAsync() for every queue until a match was found.
+  
         Task<ApiResult<CounterResponseDto>> GetMyCounterAsync();
         Task<ApiResult<CounterResponseDto>> CreateCounterAsync(CreateCounterDto dto);
         Task<ApiResult<bool>> UpdateCounterAsync(int id, UpdateCounterDto dto);
@@ -75,13 +74,3 @@ namespace SmartQueueApp.Services
         Task<ApiResult<List<CounterStatsDto>>> GetCounterStatsAsync(int queueId);
     }
 }
-
-/*
- *Why ApiResult<T> wrapper: Controllers should never crash because the API returned 404 or 500.
- *This wrapper forces every caller to handle both success and failure paths explicitly.
- *No unhandled exceptions, no yellow error screens.
- 
-
-Why an interface: The MVC app depends on IApiService not ApiService
-* — this means we can write unit tests by mocking the interface, 
-* and swap implementations without changing controllers.*/

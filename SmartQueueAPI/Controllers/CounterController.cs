@@ -269,19 +269,3 @@ namespace SmartQueueAPI.Controllers
     }
 }
 
-/*Why new counters start as Closed: A counter should never be active before a Djelatnik explicitly opens it
- * at the start of their shift.
- * This prevents estimates being calculated with phantom open counters.
-Why check for active ticket before closing/deleting: Closing a counter mid-service
- * would leave a customer stranded at the counter with no resolution.
- * This guard prevents that data integrity issue.
-Why Djelatnik can open/close but not create/delete:
- * Opening and closing is a daily shift operation — Djelatnik does it themselves.
- * Creating and deleting counters is infrastructure management — Admin only.
-Why CurrentTicketNumber shows Called OR InService:
- * Both statuses mean a customer is physically at the counter.
- * The display board needs to show this number regardless of which sub-state the service is in.
-Why GET /api/counter/mine reads userId from JWT claims:
- * The token already contains the user's GUID in the sub/NameIdentifier claim.
- * No userId parameter in the URL is needed — the token is the identity.
- * This also prevents one Djelatnik from querying another's counter by guessing an ID.*/

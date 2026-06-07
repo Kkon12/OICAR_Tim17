@@ -11,6 +11,8 @@ namespace SmartQueueApp.Models.ViewModels
         public List<CounterResponseDto> AllCounters { get; set; } = new();
         public string? ErrorMessage { get; set; }
         public string? SuccessMessage { get; set; }
+      
+        public string SignalRToken { get; set; } = string.Empty;
     }
 
     public class KioskViewModel
